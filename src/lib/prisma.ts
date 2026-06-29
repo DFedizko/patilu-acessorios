@@ -1,6 +1,9 @@
+import { neonConfig } from "@neondatabase/serverless";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@/generated/prisma/client";
+
+neonConfig.poolQueryViaFetch = true;
 
 export const createPrismaClient = (connectionString: string | undefined = process.env.DATABASE_URL): PrismaClient => {
     const isNeon = (connectionString ?? "").includes("neon.tech");
