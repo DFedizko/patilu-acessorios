@@ -14,8 +14,8 @@
         "db:migrate": "prisma migrate dev && bun run scripts/setup-test-db.ts",
         "db:generate": "prisma generate",
         "db:studio": "prisma studio",
-        "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-        "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+        "preview": "bun run scripts/build-cloudflare.ts && opennextjs-cloudflare preview",
+        "deploy": "bun run scripts/build-cloudflare.ts && opennextjs-cloudflare deploy",
         "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
     },
     "dependencies": {
