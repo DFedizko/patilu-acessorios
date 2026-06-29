@@ -4,4 +4,6 @@ const config = {
     url: "/api/openapi.json",
 };
 
-export const GET = ApiReference(config);
+const notFound = (): Response => new Response(null, { status: 404 });
+
+export const GET = process.env.NODE_ENV === "production" ? notFound : ApiReference(config);

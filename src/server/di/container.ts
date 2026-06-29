@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { Container } from "inversify";
 import { PrismaClient } from "@/generated/prisma/client";
 import { createPrismaClient } from "@/lib/prisma";
-import { AxiosHttpClient } from "@/server/infrastructure/http/AxiosHttpClient";
+import { FetchHttpClient } from "@/server/infrastructure/http/FetchHttpClient";
 import { HttpClient } from "@/server/infrastructure/http/HttpClient";
 import type { ICategoryRepository } from "@/server/domain/repository/ICategoryRepository";
 import type { ITierRepository } from "@/server/domain/repository/ITierRepository";
@@ -64,7 +64,7 @@ import { GetAdSpendUseCase } from "@/server/application/use-case/GetAdSpendUseCa
 import { SetManualAdSpendUseCase } from "@/server/application/use-case/SetManualAdSpendUseCase";
 import type { IBarcodeRenderer } from "@/server/application/gateway/IBarcodeRenderer";
 import type { IRenderTierLabelUseCase } from "@/server/application/use-case/contracts/IRenderTierLabelUseCase";
-import { BwipBarcodeRenderer } from "@/server/infrastructure/gateway/BwipBarcodeRenderer";
+import { Code128BarcodeRenderer } from "@/server/infrastructure/gateway/Code128BarcodeRenderer";
 import { RenderTierLabelUseCase } from "@/server/application/use-case/RenderTierLabelUseCase";
 import type { IReportPersistenceGateway } from "@/server/application/gateway/IReportPersistenceGateway";
 import type { IGetHistoryUseCase } from "@/server/application/use-case/contracts/IGetHistoryUseCase";
@@ -85,7 +85,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 container.bind<PrismaClient>(SYMBOLS.PrismaClient).toConstantValue(appPrismaClient);
-container.bind<HttpClient>(SYMBOLS.HttpClient).to(AxiosHttpClient);
+container.bind<HttpClient>(SYMBOLS.HttpClient).to(FetchHttpClient);
 container.bind<ICategoryRepository>(SYMBOLS.CategoryRepository).to(CategoryPrismaRepository);
 container.bind<ITierRepository>(SYMBOLS.TierRepository).to(TierPrismaRepository);
 container.bind<IConfigPersistenceGateway>(SYMBOLS.ConfigPersistenceGateway).to(ConfigPrismaPersistenceGateway);
@@ -118,7 +118,7 @@ container.bind<IGetOrderForPackingUseCase>(SYMBOLS.GetOrderForPackingUseCase).to
 container.bind<ISavePackingUseCase>(SYMBOLS.SavePackingUseCase).to(SavePackingUseCase);
 container.bind<IDeletePackingUseCase>(SYMBOLS.DeletePackingUseCase).to(DeletePackingUseCase);
 
-container.bind<IBarcodeRenderer>(SYMBOLS.BarcodeRenderer).to(BwipBarcodeRenderer);
+container.bind<IBarcodeRenderer>(SYMBOLS.BarcodeRenderer).to(Code128BarcodeRenderer);
 container.bind<IRenderTierLabelUseCase>(SYMBOLS.RenderTierLabelUseCase).to(RenderTierLabelUseCase);
 
 container.bind<PeriodReportCalculator>(SYMBOLS.PeriodReportCalculator).toConstantValue(new PeriodReportCalculator());

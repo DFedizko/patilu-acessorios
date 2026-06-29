@@ -1,4 +1,4 @@
-import { axiosHttpClient } from "@/lib/http/axios-http-client";
+import { fetchHttpClient } from "@/lib/http/fetch-http-client";
 import type { HttpClient } from "@/lib/http/http-client";
 import { createConfigService, type ConfigService } from "@/service/config-service";
 import { createOrderService, type OrderService } from "@/service/order-service";
@@ -11,7 +11,7 @@ import { FRONT_SYMBOLS } from "./symbols";
 
 const registry = new Map<symbol, unknown>();
 
-const httpClient = axiosHttpClient();
+const httpClient = fetchHttpClient();
 registry.set(FRONT_SYMBOLS.HttpClient, httpClient);
 registry.set(FRONT_SYMBOLS.ConfigService, createConfigService(httpClient));
 registry.set(FRONT_SYMBOLS.OrderService, createOrderService(httpClient));
