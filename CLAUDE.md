@@ -20,6 +20,14 @@ Patilu Kits is the internal tool of **Patilu Acessórios**, a stationery store t
 - **zod-openapi** + **Scalar** (Swagger) for automatic API documentation
 - **ESLint** + **Prettier** for linting and formatting
 
+## Deployment
+
+Deployed to **Cloudflare Workers** (via `@opennextjs/cloudflare`) with **Neon** Postgres in São Paulo, free tier, CI/CD on push to `main` (`.github/workflows/ci.yml`). Neon queries run over HTTP (`neonConfig.poolQueryViaFetch = true` in `src/lib/prisma.ts`) to avoid WebSocket cold-start failures on Workers.
+
+### Pending: Hyperdrive
+
+`neonConfig.poolQueryViaFetch = true` only covers **non-transactional** queries. **Interactive transactions** (`$transaction`) still use a WebSocket and can fail on a cold Cloudflare isolate (first request 500s, retry succeeds). Today this only affects `PackingPrismaRepository` (save/delete packing). **TODO:** if the packing write path flakes on cold start, migrate the DB connection to **Cloudflare Hyperdrive** (native connection pooling, no WebSocket) — or add a retry around the transaction as a stopgap. Hyperdrive requires reading the connection string from `getCloudflareContext().env.HYPERDRIVE` instead of `process.env.DATABASE_URL`, which means reworking the Prisma client construction in `src/server/di/container.ts` (currently built at module load).
+
 ## Commands
 
 ```bash
