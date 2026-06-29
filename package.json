@@ -1,34 +1,72 @@
 {
-  "name": "patilu-acessorios",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "next": "16.2.9",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.9",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  },
-  "ignoreScripts": [
-    "sharp",
-    "unrs-resolver"
-  ],
-  "trustedDependencies": [
-    "sharp",
-    "unrs-resolver"
-  ]
+    "name": "patilu-acessorios",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "eslint src",
+        "format": "prettier --write src",
+        "format:check": "prettier --check src",
+        "db:up": "docker compose up -d",
+        "db:down": "docker compose down",
+        "db:migrate": "prisma migrate dev && bun run scripts/setup-test-db.ts",
+        "db:generate": "prisma generate",
+        "db:studio": "prisma studio",
+        "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+        "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+        "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    },
+    "dependencies": {
+        "@clerk/nextjs": "^7.5.9",
+        "@hookform/resolvers": "^5.4.0",
+        "@neondatabase/serverless": "^1.1.0",
+        "@opennextjs/cloudflare": "^1.20.1",
+        "@prisma/adapter-neon": "^7.8.0",
+        "@prisma/adapter-pg": "^7.8.0",
+        "@prisma/client": "^7.8.0",
+        "@scalar/nextjs-api-reference": "^0.11.6",
+        "@tanstack/react-query": "^5.101.2",
+        "axios": "^1.18.1",
+        "bwip-js": "^4.11.1",
+        "date-fns": "^4.4.0",
+        "date-fns-tz": "^3.2.0",
+        "inversify": "^8.1.1",
+        "nanoid": "^5.1.16",
+        "next": "16.2.9",
+        "react": "19.2.4",
+        "react-dom": "19.2.4",
+        "react-hook-form": "^7.80.0",
+        "reflect-metadata": "^0.2.2",
+        "sonner": "^2.0.7",
+        "zod": "^4.4.3",
+        "zod-openapi": "^6.0.0",
+        "zustand": "^5.0.14"
+    },
+    "devDependencies": {
+        "@tailwindcss/postcss": "^4",
+        "@types/node": "^20",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "babel-plugin-react-compiler": "^1.0.0",
+        "eslint": "^9",
+        "eslint-config-next": "16.2.9",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-better-tailwindcss": "^4.6.0",
+        "eslint-plugin-prettier": "^5.5.6",
+        "prettier": "^3.9.1",
+        "prisma": "^7.8.0",
+        "tailwindcss": "^4",
+        "typescript": "^5",
+        "wrangler": "^4.105.0"
+    },
+    "ignoreScripts": [
+        "sharp",
+        "unrs-resolver"
+    ],
+    "trustedDependencies": [
+        "sharp",
+        "unrs-resolver"
+    ]
 }

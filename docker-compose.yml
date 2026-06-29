@@ -1,0 +1,21 @@
+services:
+    postgres:
+        image: postgres:18-alpine
+        container_name: patilu-acessorios-postgres
+        restart: unless-stopped
+        ports:
+            - "32774:5432"
+        environment:
+            POSTGRES_USER: patilu
+            POSTGRES_PASSWORD: patilu
+            POSTGRES_DB: patilu_acessorios
+        volumes:
+            - patilu-postgres-data:/var/lib/postgresql
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U patilu -d patilu_acessorios"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+volumes:
+    patilu-postgres-data:

@@ -1,0 +1,513 @@
+/* === CENTERED ANIMATIONS (ignore direction) === */
+
+@keyframes modalFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalZoom {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes modalFlipX {
+    from {
+        opacity: 0;
+        transform: perspective(600px) rotateX(90deg);
+    }
+    to {
+        opacity: 1;
+        transform: perspective(600px) rotateX(0deg);
+    }
+}
+
+@keyframes modalFlipY {
+    from {
+        opacity: 0;
+        transform: perspective(600px) rotateY(90deg);
+    }
+    to {
+        opacity: 1;
+        transform: perspective(600px) rotateY(0deg);
+    }
+}
+
+@keyframes modalRotateIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) rotate(-15deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes modalPop {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    70% {
+        transform: scale(1.06);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes modalBlurIn {
+    from {
+        opacity: 0;
+        filter: blur(0.5rem);
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(1);
+    }
+}
+
+@keyframes modalGlitch {
+    0% {
+        opacity: 0;
+        transform: translate(-0.25rem, 0.125rem) skew(-2deg);
+        filter: hue-rotate(90deg);
+    }
+    20% {
+        transform: translate(0.25rem, -0.125rem) skew(2deg);
+    }
+    40% {
+        transform: translate(-0.125rem, 0.125rem) skew(1deg);
+    }
+    60% {
+        transform: translate(0.125rem, 0) skew(-1deg);
+        filter: hue-rotate(0deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0) skew(0);
+    }
+}
+
+@keyframes modalBounce {
+    0% {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    75% {
+        transform: scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes modalSwing {
+    0% {
+        opacity: 0;
+        transform: rotate(-20deg) scale(0.9);
+    }
+    40% {
+        transform: rotate(10deg);
+    }
+    70% {
+        transform: rotate(-5deg);
+    }
+    100% {
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+@keyframes modalElastic {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1.15);
+    }
+    60% {
+        transform: scale(0.92);
+    }
+    80% {
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.fade {
+    animation: modalFade 0.25s ease-out both;
+}
+.zoom {
+    animation: modalZoom 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.flipX {
+    animation: modalFlipX 0.35s ease-out both;
+}
+.flipY {
+    animation: modalFlipY 0.35s ease-out both;
+}
+.rotateIn {
+    animation: modalRotateIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.pop {
+    animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.blurIn {
+    animation: modalBlurIn 0.35s ease-out both;
+}
+.glitch {
+    animation: modalGlitch 0.4s ease-out both;
+}
+.bounce {
+    animation: modalBounce 0.45s ease-out both;
+}
+.swing {
+    animation: modalSwing 0.5s ease-out both;
+}
+.elastic {
+    animation: modalElastic 0.5s ease-out both;
+}
+
+/* === DIRECTIONAL ANIMATIONS (8 directions each) === */
+
+/* --- slide --- */
+@keyframes modalSlideFrom {
+    from {
+        opacity: 0;
+        transform: translate(var(--from-x, 0), var(--from-y, 0));
+    }
+    to {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+.slideTopLeft {
+    --from-x: -3rem;
+    --from-y: -3rem;
+    animation: modalSlideFrom 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideTop {
+    --from-x: 0;
+    --from-y: -3rem;
+    animation: modalSlideFrom 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideTopRight {
+    --from-x: 3rem;
+    --from-y: -3rem;
+    animation: modalSlideFrom 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideRight {
+    --from-x: 3rem;
+    --from-y: 0;
+    animation: modalSlideFrom 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideBottomRight {
+    --from-x: 3rem;
+    --from-y: 3rem;
+    animation: modalSlideFrom 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideBottom {
+    --from-x: 0;
+    --from-y: 3rem;
+    animation: modalSlideFrom 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideBottomLeft {
+    --from-x: -3rem;
+    --from-y: 3rem;
+    animation: modalSlideFrom 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideLeft {
+    --from-x: -3rem;
+    --from-y: 0;
+    animation: modalSlideFrom 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* --- slide-corner (more dramatic diagonal) --- */
+.slideCornerTopLeft {
+    --from-x: -6rem;
+    --from-y: -4rem;
+    animation: modalSlideFrom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideCornerTop {
+    --from-x: -2rem;
+    --from-y: -6rem;
+    animation: modalSlideFrom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideCornerTopRight {
+    --from-x: 6rem;
+    --from-y: -4rem;
+    animation: modalSlideFrom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideCornerRight {
+    --from-x: 6rem;
+    --from-y: 2rem;
+    animation: modalSlideFrom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideCornerBottomRight {
+    --from-x: 6rem;
+    --from-y: 4rem;
+    animation: modalSlideFrom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideCornerBottom {
+    --from-x: 2rem;
+    --from-y: 6rem;
+    animation: modalSlideFrom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideCornerBottomLeft {
+    --from-x: -6rem;
+    --from-y: 4rem;
+    animation: modalSlideFrom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.slideCornerLeft {
+    --from-x: -6rem;
+    --from-y: -2rem;
+    animation: modalSlideFrom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* --- fold (unfold from edge) --- */
+@keyframes modalFoldV {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+@keyframes modalFoldH {
+    from {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+    to {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+@keyframes modalFoldD {
+    from {
+        opacity: 0;
+        transform: scale(0, 0);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1, 1);
+    }
+}
+
+.foldTopLeft {
+    transform-origin: top left;
+    animation: modalFoldD 0.32s ease-out both;
+}
+.foldTop {
+    transform-origin: top;
+    animation: modalFoldV 0.32s ease-out both;
+}
+.foldTopRight {
+    transform-origin: top right;
+    animation: modalFoldD 0.32s ease-out both;
+}
+.foldRight {
+    transform-origin: right;
+    animation: modalFoldH 0.32s ease-out both;
+}
+.foldBottomRight {
+    transform-origin: bottom right;
+    animation: modalFoldD 0.32s ease-out both;
+}
+.foldBottom {
+    transform-origin: bottom;
+    animation: modalFoldV 0.32s ease-out both;
+}
+.foldBottomLeft {
+    transform-origin: bottom left;
+    animation: modalFoldD 0.32s ease-out both;
+}
+.foldLeft {
+    transform-origin: left;
+    animation: modalFoldH 0.32s ease-out both;
+}
+
+/* --- drop (translate + scale-down entrance) --- */
+@keyframes modalDropFrom {
+    from {
+        opacity: 0;
+        transform: translate(var(--from-x, 0), var(--from-y, 0)) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+}
+
+.dropTopLeft {
+    --from-x: -2rem;
+    --from-y: -2rem;
+    animation: modalDropFrom 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dropTop {
+    --from-x: 0;
+    --from-y: -2rem;
+    animation: modalDropFrom 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dropTopRight {
+    --from-x: 2rem;
+    --from-y: -2rem;
+    animation: modalDropFrom 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dropRight {
+    --from-x: 2rem;
+    --from-y: 0;
+    animation: modalDropFrom 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dropBottomRight {
+    --from-x: 2rem;
+    --from-y: 2rem;
+    animation: modalDropFrom 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dropBottom {
+    --from-x: 0;
+    --from-y: 2rem;
+    animation: modalDropFrom 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dropBottomLeft {
+    --from-x: -2rem;
+    --from-y: 2rem;
+    animation: modalDropFrom 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dropLeft {
+    --from-x: -2rem;
+    --from-y: 0;
+    animation: modalDropFrom 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* --- reveal (clip-path wipe) --- */
+@keyframes modalRevealTop {
+    from {
+        opacity: 0;
+        clip-path: inset(0 0 100% 0 round 1.375rem);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 1.375rem);
+    }
+}
+@keyframes modalRevealBottom {
+    from {
+        opacity: 0;
+        clip-path: inset(100% 0 0 0 round 1.375rem);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 1.375rem);
+    }
+}
+@keyframes modalRevealLeft {
+    from {
+        opacity: 0;
+        clip-path: inset(0 100% 0 0 round 1.375rem);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 1.375rem);
+    }
+}
+@keyframes modalRevealRight {
+    from {
+        opacity: 0;
+        clip-path: inset(0 0 0 100% round 1.375rem);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 1.375rem);
+    }
+}
+@keyframes modalRevealTopLeft {
+    from {
+        opacity: 0;
+        clip-path: inset(0 100% 100% 0 round 1.375rem);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 1.375rem);
+    }
+}
+@keyframes modalRevealTopRight {
+    from {
+        opacity: 0;
+        clip-path: inset(0 0 100% 100% round 1.375rem);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 1.375rem);
+    }
+}
+@keyframes modalRevealBottomRight {
+    from {
+        opacity: 0;
+        clip-path: inset(100% 0 0 100% round 1.375rem);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 1.375rem);
+    }
+}
+@keyframes modalRevealBottomLeft {
+    from {
+        opacity: 0;
+        clip-path: inset(100% 100% 0 0 round 1.375rem);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 1.375rem);
+    }
+}
+
+.revealTopLeft {
+    animation: modalRevealTopLeft 0.4s ease-out both;
+}
+.revealTop {
+    animation: modalRevealTop 0.4s ease-out both;
+}
+.revealTopRight {
+    animation: modalRevealTopRight 0.4s ease-out both;
+}
+.revealRight {
+    animation: modalRevealRight 0.4s ease-out both;
+}
+.revealBottomRight {
+    animation: modalRevealBottomRight 0.4s ease-out both;
+}
+.revealBottom {
+    animation: modalRevealBottom 0.4s ease-out both;
+}
+.revealBottomLeft {
+    animation: modalRevealBottomLeft 0.4s ease-out both;
+}
+.revealLeft {
+    animation: modalRevealLeft 0.4s ease-out both;
+}

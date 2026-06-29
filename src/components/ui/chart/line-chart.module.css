@@ -1,0 +1,14 @@
+.sweep {
+    transform-box: fill-box;
+    transform-origin: left;
+    animation: sweep 0.9s ease-out;
+}
+
+@keyframes sweep {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}

@@ -1,0 +1,132 @@
+import "reflect-metadata";
+import { Container } from "inversify";
+import { PrismaClient } from "@/generated/prisma/client";
+import { createPrismaClient } from "@/lib/prisma";
+import { AxiosHttpClient } from "@/server/infrastructure/http/AxiosHttpClient";
+import { HttpClient } from "@/server/infrastructure/http/HttpClient";
+import type { ICategoryRepository } from "@/server/domain/repository/ICategoryRepository";
+import type { ITierRepository } from "@/server/domain/repository/ITierRepository";
+import { CategoryPrismaRepository } from "@/server/infrastructure/repository/CategoryPrismaRepository";
+import { TierPrismaRepository } from "@/server/infrastructure/repository/TierPrismaRepository";
+import type { IConfigPersistenceGateway } from "@/server/application/gateway/IConfigPersistenceGateway";
+import type { ICatalogReadPersistenceGateway } from "@/server/application/gateway/ICatalogReadPersistenceGateway";
+import type { IGetFixedCostUseCase } from "@/server/application/use-case/contracts/IGetFixedCostUseCase";
+import type { ISetFixedCostUseCase } from "@/server/application/use-case/contracts/ISetFixedCostUseCase";
+import type { ICreateCategoryUseCase } from "@/server/application/use-case/contracts/ICreateCategoryUseCase";
+import type { IRenameCategoryUseCase } from "@/server/application/use-case/contracts/IRenameCategoryUseCase";
+import type { IDeleteCategoryUseCase } from "@/server/application/use-case/contracts/IDeleteCategoryUseCase";
+import type { IListCatalogUseCase } from "@/server/application/use-case/contracts/IListCatalogUseCase";
+import { ConfigPrismaPersistenceGateway } from "@/server/infrastructure/gateway/ConfigPrismaPersistenceGateway";
+import { CatalogReadPrismaPersistenceGateway } from "@/server/infrastructure/gateway/CatalogReadPrismaPersistenceGateway";
+import { GetFixedCostUseCase } from "@/server/application/use-case/GetFixedCostUseCase";
+import { SetFixedCostUseCase } from "@/server/application/use-case/SetFixedCostUseCase";
+import { CreateCategoryUseCase } from "@/server/application/use-case/CreateCategoryUseCase";
+import { RenameCategoryUseCase } from "@/server/application/use-case/RenameCategoryUseCase";
+import { DeleteCategoryUseCase } from "@/server/application/use-case/DeleteCategoryUseCase";
+import { ListCatalogUseCase } from "@/server/application/use-case/ListCatalogUseCase";
+import { BarcodeCodeGenerator } from "@/server/domain/service/BarcodeCodeGenerator";
+import type { ICreateTierUseCase } from "@/server/application/use-case/contracts/ICreateTierUseCase";
+import type { IUpdateTierUseCase } from "@/server/application/use-case/contracts/IUpdateTierUseCase";
+import type { IDeleteTierUseCase } from "@/server/application/use-case/contracts/IDeleteTierUseCase";
+import type { IFindTierByBarcodeUseCase } from "@/server/application/use-case/contracts/IFindTierByBarcodeUseCase";
+import { CreateTierUseCase } from "@/server/application/use-case/CreateTierUseCase";
+import { UpdateTierUseCase } from "@/server/application/use-case/UpdateTierUseCase";
+import { DeleteTierUseCase } from "@/server/application/use-case/DeleteTierUseCase";
+import { FindTierByBarcodeUseCase } from "@/server/application/use-case/FindTierByBarcodeUseCase";
+import type { IOrderRepository } from "@/server/domain/repository/IOrderRepository";
+import type { IOrderListPersistenceGateway } from "@/server/application/gateway/IOrderListPersistenceGateway";
+import type { ITikTokOrdersGateway } from "@/server/application/gateway/ITikTokOrdersGateway";
+import type { ITikTokAdsGateway } from "@/server/application/gateway/ITikTokAdsGateway";
+import type { IIngestTikTokOrderUseCase } from "@/server/application/use-case/contracts/IIngestTikTokOrderUseCase";
+import type { IListOrdersUseCase } from "@/server/application/use-case/contracts/IListOrdersUseCase";
+import { OrderPrismaRepository } from "@/server/infrastructure/repository/OrderPrismaRepository";
+import { OrderListPrismaPersistenceGateway } from "@/server/infrastructure/gateway/OrderListPrismaPersistenceGateway";
+import { TikTokOrderTranslator } from "@/server/domain/acl/TikTokOrderTranslator";
+import { TikTokAdsTranslator } from "@/server/domain/acl/TikTokAdsTranslator";
+import { IngestTikTokOrderUseCase } from "@/server/application/use-case/IngestTikTokOrderUseCase";
+import { ListOrdersUseCase } from "@/server/application/use-case/ListOrdersUseCase";
+import type { IPackingRepository } from "@/server/domain/repository/IPackingRepository";
+import type { IGetOrderForPackingUseCase } from "@/server/application/use-case/contracts/IGetOrderForPackingUseCase";
+import type { ISavePackingUseCase } from "@/server/application/use-case/contracts/ISavePackingUseCase";
+import type { IDeletePackingUseCase } from "@/server/application/use-case/contracts/IDeletePackingUseCase";
+import { PackingPrismaRepository } from "@/server/infrastructure/repository/PackingPrismaRepository";
+import { GetOrderForPackingUseCase } from "@/server/application/use-case/GetOrderForPackingUseCase";
+import { SavePackingUseCase } from "@/server/application/use-case/SavePackingUseCase";
+import { DeletePackingUseCase } from "@/server/application/use-case/DeletePackingUseCase";
+import { FakeTikTokOrdersGateway } from "../../../test/fakes/FakeTikTokOrdersGateway";
+import { FakeTikTokAdsGateway } from "../../../test/fakes/FakeTikTokAdsGateway";
+import type { IAdSpendPersistenceGateway } from "@/server/application/gateway/IAdSpendPersistenceGateway";
+import type { IGetAdSpendUseCase } from "@/server/application/use-case/contracts/IGetAdSpendUseCase";
+import type { ISetManualAdSpendUseCase } from "@/server/application/use-case/contracts/ISetManualAdSpendUseCase";
+import { AdSpendPrismaPersistenceGateway } from "@/server/infrastructure/gateway/AdSpendPrismaPersistenceGateway";
+import { PeriodReportCalculator } from "@/server/domain/service/PeriodReportCalculator";
+import { GetAdSpendUseCase } from "@/server/application/use-case/GetAdSpendUseCase";
+import { SetManualAdSpendUseCase } from "@/server/application/use-case/SetManualAdSpendUseCase";
+import type { IBarcodeRenderer } from "@/server/application/gateway/IBarcodeRenderer";
+import type { IRenderTierLabelUseCase } from "@/server/application/use-case/contracts/IRenderTierLabelUseCase";
+import { BwipBarcodeRenderer } from "@/server/infrastructure/gateway/BwipBarcodeRenderer";
+import { RenderTierLabelUseCase } from "@/server/application/use-case/RenderTierLabelUseCase";
+import type { IReportPersistenceGateway } from "@/server/application/gateway/IReportPersistenceGateway";
+import type { IGetHistoryUseCase } from "@/server/application/use-case/contracts/IGetHistoryUseCase";
+import type { IExportHistoryUseCase } from "@/server/application/use-case/contracts/IExportHistoryUseCase";
+import type { IGetDashboardUseCase } from "@/server/application/use-case/contracts/IGetDashboardUseCase";
+import { ReportPrismaPersistenceGateway } from "@/server/infrastructure/gateway/ReportPrismaPersistenceGateway";
+import { GetHistoryUseCase } from "@/server/application/use-case/GetHistoryUseCase";
+import { ExportHistoryUseCase } from "@/server/application/use-case/ExportHistoryUseCase";
+import { GetDashboardUseCase } from "@/server/application/use-case/GetDashboardUseCase";
+import { SYMBOLS } from "./symbols";
+
+export const container = new Container();
+
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+const appPrismaClient = globalForPrisma.prisma ?? createPrismaClient();
+if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.prisma = appPrismaClient;
+}
+
+container.bind<PrismaClient>(SYMBOLS.PrismaClient).toConstantValue(appPrismaClient);
+container.bind<HttpClient>(SYMBOLS.HttpClient).to(AxiosHttpClient);
+container.bind<ICategoryRepository>(SYMBOLS.CategoryRepository).to(CategoryPrismaRepository);
+container.bind<ITierRepository>(SYMBOLS.TierRepository).to(TierPrismaRepository);
+container.bind<IConfigPersistenceGateway>(SYMBOLS.ConfigPersistenceGateway).to(ConfigPrismaPersistenceGateway);
+container
+    .bind<ICatalogReadPersistenceGateway>(SYMBOLS.CatalogReadPersistenceGateway)
+    .to(CatalogReadPrismaPersistenceGateway);
+container.bind<IGetFixedCostUseCase>(SYMBOLS.GetFixedCostUseCase).to(GetFixedCostUseCase);
+container.bind<ISetFixedCostUseCase>(SYMBOLS.SetFixedCostUseCase).to(SetFixedCostUseCase);
+container.bind<ICreateCategoryUseCase>(SYMBOLS.CreateCategoryUseCase).to(CreateCategoryUseCase);
+container.bind<IRenameCategoryUseCase>(SYMBOLS.RenameCategoryUseCase).to(RenameCategoryUseCase);
+container.bind<IDeleteCategoryUseCase>(SYMBOLS.DeleteCategoryUseCase).to(DeleteCategoryUseCase);
+container.bind<IListCatalogUseCase>(SYMBOLS.ListCatalogUseCase).to(ListCatalogUseCase);
+container.bind<BarcodeCodeGenerator>(SYMBOLS.BarcodeCodeGenerator).toConstantValue(new BarcodeCodeGenerator());
+container.bind<ICreateTierUseCase>(SYMBOLS.CreateTierUseCase).to(CreateTierUseCase);
+container.bind<IUpdateTierUseCase>(SYMBOLS.UpdateTierUseCase).to(UpdateTierUseCase);
+container.bind<IDeleteTierUseCase>(SYMBOLS.DeleteTierUseCase).to(DeleteTierUseCase);
+container.bind<IFindTierByBarcodeUseCase>(SYMBOLS.FindTierByBarcodeUseCase).to(FindTierByBarcodeUseCase);
+
+container.bind<IOrderRepository>(SYMBOLS.OrderRepository).to(OrderPrismaRepository);
+container.bind<IOrderListPersistenceGateway>(SYMBOLS.OrderListPersistenceGateway).to(OrderListPrismaPersistenceGateway);
+container.bind<ITikTokOrdersGateway>(SYMBOLS.TikTokOrdersGateway).toConstantValue(new FakeTikTokOrdersGateway());
+container.bind<ITikTokAdsGateway>(SYMBOLS.TikTokAdsGateway).toConstantValue(new FakeTikTokAdsGateway());
+container.bind<TikTokOrderTranslator>(SYMBOLS.TikTokOrderTranslator).toConstantValue(new TikTokOrderTranslator());
+container.bind<TikTokAdsTranslator>(SYMBOLS.TikTokAdsTranslator).toConstantValue(new TikTokAdsTranslator());
+container.bind<IIngestTikTokOrderUseCase>(SYMBOLS.IngestTikTokOrderUseCase).to(IngestTikTokOrderUseCase);
+container.bind<IListOrdersUseCase>(SYMBOLS.ListOrdersUseCase).to(ListOrdersUseCase);
+
+container.bind<IPackingRepository>(SYMBOLS.PackingRepository).to(PackingPrismaRepository);
+container.bind<IGetOrderForPackingUseCase>(SYMBOLS.GetOrderForPackingUseCase).to(GetOrderForPackingUseCase);
+container.bind<ISavePackingUseCase>(SYMBOLS.SavePackingUseCase).to(SavePackingUseCase);
+container.bind<IDeletePackingUseCase>(SYMBOLS.DeletePackingUseCase).to(DeletePackingUseCase);
+
+container.bind<IBarcodeRenderer>(SYMBOLS.BarcodeRenderer).to(BwipBarcodeRenderer);
+container.bind<IRenderTierLabelUseCase>(SYMBOLS.RenderTierLabelUseCase).to(RenderTierLabelUseCase);
+
+container.bind<PeriodReportCalculator>(SYMBOLS.PeriodReportCalculator).toConstantValue(new PeriodReportCalculator());
+container.bind<IAdSpendPersistenceGateway>(SYMBOLS.AdSpendPersistenceGateway).to(AdSpendPrismaPersistenceGateway);
+container.bind<IGetAdSpendUseCase>(SYMBOLS.GetAdSpendUseCase).to(GetAdSpendUseCase);
+container.bind<ISetManualAdSpendUseCase>(SYMBOLS.SetManualAdSpendUseCase).to(SetManualAdSpendUseCase);
+
+container.bind<IReportPersistenceGateway>(SYMBOLS.ReportPersistenceGateway).to(ReportPrismaPersistenceGateway);
+container.bind<IGetHistoryUseCase>(SYMBOLS.GetHistoryUseCase).to(GetHistoryUseCase);
+container.bind<IExportHistoryUseCase>(SYMBOLS.ExportHistoryUseCase).to(ExportHistoryUseCase);
+container.bind<IGetDashboardUseCase>(SYMBOLS.GetDashboardUseCase).to(GetDashboardUseCase);

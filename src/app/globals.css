@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+button {
+    cursor: pointer;
+}
+
+@theme {
+    --font-sans: var(--font-inter);
+    --font-head: var(--font-baloo);
+
+    --color-ink: #2c1b4e;
+    --color-muted: #8c7ca8;
+    --color-primary: #7b3fe4;
+    --color-primary-strong: #6b33c9;
+    --color-accent: #f368a6;
+    --color-ads: #f59e0b;
+    --color-dark: #241640;
+
+    --color-good: #1fa971;
+    --color-warn: #d99412;
+    --color-danger: #e0464b;
+    --color-danger-line: #f3c9cb;
+
+    --color-line: #f1e8fb;
+    --color-tint: #fbf6fe;
+    --color-field: #fbf8fe;
+    --color-field-line: #e7daf8;
+    --color-ghost: #f2eafd;
+    --color-hover: #f7f1fd;
+    --color-card: #fcfafe;
+    --color-card-line: #f0e8fb;
+    --color-card-active: #fbf1f8;
+    --color-card-active-line: #f4a9d2;
+    --color-scan-line: #c9aef2;
+    --color-bar-line: #eee3fb;
+    --color-chip: #fbeff7;
+    --color-chip-text: #c23e8f;
+
+    --color-chart-1: #7b3fe4;
+    --color-chart-2: #9a5bef;
+    --color-chart-3: #b96ae0;
+    --color-chart-4: #dd6aa8;
+    --color-chart-5: #f38ac0;
+}
+
+@utility app-bg {
+    background: radial-gradient(1100px 560px at 82% -12%, #f4ecfd, #f2ecfb);
+}
+
+@utility brand-mark {
+    background: linear-gradient(135deg, #8a4bec, #f368a6);
+}
+
+@utility modal-overlay {
+    background: rgba(20, 12, 40, 0.5);
+}
+
+@utility panel {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 22px;
+    box-shadow: 0 12px 34px rgba(123, 63, 228, 0.09);
+}
+
+@utility panel-sm {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(123, 63, 228, 0.06);
+}
+
+@utility floating-bar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--color-bar-line);
+    border-radius: 20px;
+    box-shadow: 0 14px 34px rgba(123, 63, 228, 0.16);
+}
+
+@utility input-base {
+    border: 1px solid var(--color-field-line);
+    background: var(--color-field);
+    border-radius: 14px;
+    color: var(--color-ink);
+    outline: none;
+}
+
+@utility scan-box {
+    background: #fff;
+    border: 1.5px dashed var(--color-scan-line);
+    border-radius: 18px;
+}
+
+@utility chip {
+    background: var(--color-chip);
+    color: var(--color-chip-text);
+}
+
+@utility card-base {
+    background: var(--color-card);
+    border: 1.5px solid var(--color-card-line);
+    border-radius: 18px;
+}
+
+@utility card-active {
+    background: var(--color-card-active);
+    border: 1.5px solid var(--color-card-active-line);
+    border-radius: 18px;
+    box-shadow: 0 6px 16px rgba(243, 104, 166, 0.16);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(123, 63, 228, 0.25);
+    border-radius: 8px;
+}
+
+@media print {
+    @page {
+        size: 50mm 30mm;
+        margin: 0;
+    }
+}

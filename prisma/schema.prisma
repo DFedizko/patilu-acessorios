@@ -1,0 +1,122 @@
+generator client {
+    provider = "prisma-client"
+    output   = "../src/generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+model Category {
+    id        String   @id @default(cuid())
+    name      String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    tiers     Tier[]
+
+    @@map("categories")
+}
+
+model Tier {
+    id         String    @id @default(cuid())
+    name       String
+    costCents  Int
+    barcode    String    @unique
+    categoryId String?
+    category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+
+    @@index([categoryId])
+    @@map("tiers")
+}
+
+enum ShipmentStatus {
+    PENDING
+    SHIPPED
+    CANCELLED
+}
+
+enum PackingStatus {
+    NOT_PACKED
+    PACKED
+}
+
+model Order {
+    id             String         @id @default(cuid())
+    tiktokOrderId  String         @unique
+    orderNumber    String
+    recipientName  String?
+    saleCents      Int
+    shippingCents  Int            @default(0)
+    orderedAt      DateTime
+    shipmentStatus ShipmentStatus @default(PENDING)
+    packingStatus  PackingStatus  @default(NOT_PACKED)
+    packing        Packing?
+    createdAt      DateTime       @default(now())
+    updatedAt      DateTime       @updatedAt
+
+    @@index([orderedAt])
+    @@index([shipmentStatus, packingStatus])
+    @@map("orders")
+}
+
+model Packing {
+    id         String        @id @default(cuid())
+    orderId    String        @unique
+    order      Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    operatorId String
+    packedAt   DateTime      @default(now())
+    items      PackingItem[]
+    looseItems LooseItem[]
+    updatedAt  DateTime      @updatedAt
+
+    @@map("packings")
+}
+
+model PackingItem {
+    id            String  @id @default(cuid())
+    packingId     String
+    packing       Packing @relation(fields: [packingId], references: [id], onDelete: Cascade)
+    tierId        String?
+    tierName      String
+    categoryName  String
+    unitCostCents Int
+    quantity      Int
+
+    @@index([packingId])
+    @@map("packing_items")
+}
+
+model LooseItem {
+    id        String  @id @default(cuid())
+    packingId String
+    packing   Packing @relation(fields: [packingId], references: [id], onDelete: Cascade)
+    name      String
+    costCents Int
+
+    @@index([packingId])
+    @@map("loose_items")
+}
+
+enum AdSpendSource {
+    TIKTOK
+    MANUAL
+}
+
+model AdSpendDay {
+    day         DateTime      @id @db.Date
+    amountCents Int
+    source      AdSpendSource
+    updatedAt   DateTime      @updatedAt
+
+    @@map("ad_spend_days")
+}
+
+model AppConfig {
+    id                     String   @id @default("singleton")
+    fixedCostPerOrderCents Int      @default(300)
+    updatedAt              DateTime @updatedAt
+
+    @@map("app_config")
+}
