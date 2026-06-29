@@ -9,6 +9,7 @@ export const toHttpResponse = (error: unknown): NextResponse => {
     if (error instanceof DomainError || error instanceof NotFoundError) {
         return NextResponse.json({ error: { code: error.code, message: error.message } }, { status: error.httpStatus });
     }
+    console.error(error);
     return NextResponse.json(
         { error: { code: INTERNAL_ERROR_CODE, message: "An unexpected error occurred" } },
         { status: INTERNAL_ERROR_STATUS },
