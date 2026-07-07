@@ -7,6 +7,7 @@ import { useUpdateTier } from "@/hooks/mutation/use-update-tier";
 import { useDeleteTier } from "@/hooks/mutation/use-delete-tier";
 import { useLabelStore } from "@/stores/use-label-store";
 import { Button } from "@/components/ui/button";
+import { TrashIcon } from "@/components/ui/icons/trash-icon";
 
 interface TierRowProps {
     tier: ApiTier;
@@ -34,14 +35,14 @@ export const TierRow = ({ tier }: TierRowProps) => {
     };
     if (editing) {
         return (
-            <div className="flex items-center gap-3 border-t border-line px-4.5 py-3">
+            <div className="flex items-center gap-3 border-t border-border px-4.5 py-3">
                 <input
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                     className="flex-1 input-base px-3 py-2.25 text-sm"
                 />
                 <div className="flex w-27.5 items-center input-base px-2.5">
-                    <span className="text-[0.8125rem] text-muted">R$</span>
+                    <span className="text-sm text-ink-muted">R$</span>
                     <input
                         value={cost}
                         onChange={(event) => setCost(event.target.value)}
@@ -49,23 +50,23 @@ export const TierRow = ({ tier }: TierRowProps) => {
                         className="w-full border-none bg-transparent px-1.25 py-2.25 text-sm text-ink outline-none"
                     />
                 </div>
-                <Button onClick={save} disabled={updateTier.isPending} className="px-3.5 py-2.25 text-[0.8125rem]">
+                <Button onClick={save} disabled={updateTier.isPending} className="px-3.5 py-2.25 text-xs">
                     Salvar
                 </Button>
             </div>
         );
     }
     return (
-        <div className="flex items-center gap-3 border-t border-line px-4.5 py-3">
+        <div className="flex items-center gap-3 border-t border-border px-4.5 py-3">
             <span className="flex-1 text-sm font-semibold text-ink">{tier.name}</span>
-            <span className="w-20 text-right text-sm font-bold text-primary tabular-nums">
+            <span className="w-20 text-right font-mono text-sm font-semibold text-ink tabular-nums">
                 {formatCurrency(tier.costCents / 100)}
             </span>
-            <span className="w-22.5 text-right text-xs text-muted tabular-nums">{tier.barcode}</span>
+            <span className="w-22.5 text-right font-mono text-xs text-ink-muted tabular-nums">{tier.barcode}</span>
             <Button
                 variant="ghost"
                 onClick={() => openLabel({ id: tier.id, name: tier.name, costCents: tier.costCents })}
-                className="px-3 py-2 text-[0.8125rem]"
+                className="px-3 py-2 text-xs"
             >
                 Etiqueta
             </Button>
@@ -76,17 +77,17 @@ export const TierRow = ({ tier }: TierRowProps) => {
                     setCost(toCostInput(tier.costCents));
                     setEditing(true);
                 }}
-                className="px-3 py-2 text-[0.8125rem]"
+                className="px-3 py-2 text-xs"
             >
                 Editar
             </Button>
             <Button
                 variant="ghostDanger"
-                onClick={() => deleteTier.mutate(tier.id)}
-                className="p-1.5 text-lg"
+                onClick={() => deleteTier.removeWithUndo({ id: tier.id, name: tier.name })}
+                className="p-2"
                 ariaLabel={`Excluir faixa ${tier.name}`}
             >
-                ×
+                <TrashIcon className="size-4" />
             </Button>
         </div>
     );

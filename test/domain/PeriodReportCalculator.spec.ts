@@ -40,7 +40,7 @@ describe("PeriodReportCalculator", () => {
     });
 
     describe("computeNetMarginPerOrder", () => {
-        it("computes margin = sale - itemsCost - shipping - cpa - fixedCost", () => {
+        it("computes margin = sale - itemsCost - shipping - cpa - fixedCost - tax (4.2%)", () => {
             // Arrange
             const order = makeOrder({
                 sale: Money.fromCents(10000),
@@ -53,21 +53,34 @@ describe("PeriodReportCalculator", () => {
             // Act
             const result = calculator.computeNetMarginPerOrder(order, cpa, fixedCost);
 
-            // Assert — 10000 - 3000 - 1000 - 500 - 300 = 5200
-            expect(result.value.toCents()).toBe(5200);
-            expect(result.pct).toBeCloseTo(52, 0);
+            // Assert — tax = 4.2% of 10000 = 420; 10000 - 3000 - 1000 - 500 - 300 - 420 = 4780
+            expect(result.value.toCents()).toBe(4780);
+            expect(result.pct).toBeCloseTo(47.8, 1);
         });
 
-        it("treats null itemsCost as zero", () => {
+        it("treats null itemsCost as zero and still discounts tax", () => {
             // Arrange
             const order = makeOrder({ sale: Money.fromCents(10000), shipping: Money.fromCents(0), itemsCost: null });
 
             // Act
             const result = calculator.computeNetMarginPerOrder(order, Money.zero(), Money.zero());
 
+            // Assert — tax = 420; 10000 - 420 = 9580
+            expect(result.value.toCents()).toBe(9580);
+            expect(result.pct).toBeCloseTo(95.8, 1);
+        });
+    });
+
+    describe("computeTax", () => {
+        it("returns 4.2% of the sale value rounded to cents", () => {
+            // Arrange
+            const sale = Money.fromCents(10000);
+
+            // Act
+            const tax = calculator.computeTax(sale);
+
             // Assert
-            expect(result.value.toCents()).toBe(10000);
-            expect(result.pct).toBeCloseTo(100, 0);
+            expect(tax.toCents()).toBe(420);
         });
     });
 
@@ -90,7 +103,7 @@ describe("PeriodReportCalculator", () => {
     });
 
     describe("computePeriodProfit", () => {
-        it("computes profit = revenue - cost - shipping - totalAds - (fixedCost * orderCount)", () => {
+        it("computes profit = revenue - cost - shipping - totalAds - (fixedCost * orderCount) - tax", () => {
             // Arrange
             const orders = [
                 makeOrder({
@@ -112,10 +125,12 @@ describe("PeriodReportCalculator", () => {
 
             // Assert
             // revenue = 18000, cost = 5000, shipping = 1500, fixedTotal = 600
-            // profit = 18000 - 5000 - 1500 - 5000 - 600 = 5900
+            // tax = 4.2% of 10000 + 4.2% of 8000 = 420 + 336 = 756
+            // profit = 18000 - 5000 - 1500 - 5000 - 600 - 756 = 5144
             expect(result.revenue.toCents()).toBe(18000);
             expect(result.cost.toCents()).toBe(5000);
-            expect(result.profit.toCents()).toBe(5900);
+            expect(result.tax.toCents()).toBe(756);
+            expect(result.profit.toCents()).toBe(5144);
         });
     });
 

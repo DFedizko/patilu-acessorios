@@ -45,6 +45,12 @@ export const setFixedCostSchema = z.object({
 
 export type SetFixedCostDTO = z.input<typeof setFixedCostSchema>;
 
+export const listCatalogQuerySchema = z.object({
+    search: z.string().optional(),
+});
+
+export type ListCatalogDTO = z.input<typeof listCatalogQuerySchema>;
+
 export const createCategorySchema = z.object({
     name: z.string().trim().min(1, "Informe o nome da categoria"),
 });
@@ -132,6 +138,7 @@ export type HistoryRow = {
     saleCents: number;
     itemsCostCents: number | null;
     cpaCents: number;
+    taxCents: number;
     fixedCostCents: number;
     netMarginCents: number | null;
     netMarginPct: number | null;
@@ -141,6 +148,7 @@ export type HistorySummary = {
     orderCount: number;
     revenueCents: number;
     costCents: number;
+    taxCents: number;
     totalAdsCents: number;
     profitCents: number;
     avgMarginPct: number;

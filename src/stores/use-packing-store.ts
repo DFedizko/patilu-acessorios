@@ -11,9 +11,16 @@ const emptyDraft = (): PackingDraft => ({
     looseItems: [],
 });
 
+interface ScanSignal {
+    tierId: string;
+    nonce: number;
+}
+
 interface PackingState {
     draft: PackingDraft;
+    lastScan: ScanSignal | null;
     increment: (tierId: string) => void;
+    registerScan: (tierId: string) => void;
     decrement: (tierId: string) => void;
     addLooseItem: (item: LooseItem) => void;
     removeLooseItem: (index: number) => void;
@@ -23,12 +30,21 @@ interface PackingState {
 
 export const usePackingStore = create<PackingState>((set) => ({
     draft: emptyDraft(),
+    lastScan: null,
     increment: (tierId) =>
         set((state) => ({
             draft: {
                 ...state.draft,
                 counts: { ...state.draft.counts, [tierId]: (state.draft.counts[tierId] ?? 0) + 1 },
             },
+        })),
+    registerScan: (tierId) =>
+        set((state) => ({
+            draft: {
+                ...state.draft,
+                counts: { ...state.draft.counts, [tierId]: (state.draft.counts[tierId] ?? 0) + 1 },
+            },
+            lastScan: { tierId, nonce: (state.lastScan?.nonce ?? 0) + 1 },
         })),
     decrement: (tierId) =>
         set((state) => ({
@@ -51,6 +67,6 @@ export const usePackingStore = create<PackingState>((set) => ({
                 looseItems: state.draft.looseItems.filter((_, position) => position !== index),
             },
         })),
-    initFromPacking: (counts, looseItems) => set({ draft: { counts, looseItems } }),
-    reset: () => set({ draft: emptyDraft() }),
+    initFromPacking: (counts, looseItems) => set({ draft: { counts, looseItems }, lastScan: null }),
+    reset: () => set({ draft: emptyDraft(), lastScan: null }),
 }));

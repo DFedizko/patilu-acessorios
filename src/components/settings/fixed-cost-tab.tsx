@@ -43,7 +43,7 @@ export const FixedCostTab = () => {
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
-            <p className="text-sm/relaxed text-muted">
+            <p className="text-sm/relaxed text-ink-muted">
                 O custo fixo por pedido é descontado do lucro bruto em cada venda. Alterar este valor passa a valer
                 imediatamente para os cálculos de Histórico e Dashboard.
             </p>
@@ -56,7 +56,7 @@ export const FixedCostTab = () => {
                     )}
                 />
                 {form.formState.errors.amount && (
-                    <span className="text-xs text-danger">{form.formState.errors.amount.message}</span>
+                    <span className="text-xs text-negative">{form.formState.errors.amount.message}</span>
                 )}
             </Field>
             <Button

@@ -1,78 +1,134 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useEffect, useState, type ComponentType, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { IconProps } from "@/components/ui/icon";
+import { PackageIcon } from "@/components/ui/icons/package-icon";
+import { HistoryIcon } from "@/components/ui/icons/history-icon";
+import { LayoutDashboardIcon } from "@/components/ui/icons/layout-dashboard-icon";
+import { TagsIcon } from "@/components/ui/icons/tags-icon";
+import { SettingsIcon } from "@/components/ui/icons/settings-icon";
+import { PanelLeftCloseIcon } from "@/components/ui/icons/panel-left-close-icon";
+import { PanelLeftOpenIcon } from "@/components/ui/icons/panel-left-open-icon";
+import { useSidebarStore } from "@/stores/use-sidebar-store";
+import { useGoToNavigation } from "@/hooks/use-go-to-navigation";
+import { Tooltip } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import { SettingsModal } from "@/components/settings/settings-modal";
 
-const NAV_ITEMS: [string, string][] = [
-    ["/pedidos", "Pedidos"],
-    ["/history", "Histórico"],
-    ["/dashboard", "Dashboard"],
-    ["/categories", "Categorias"],
+const NAV_ITEMS: { href: string; label: string; icon: ComponentType<IconProps> }[] = [
+    { href: "/pedidos", label: "Pedidos", icon: PackageIcon },
+    { href: "/historico", label: "Histórico", icon: HistoryIcon },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon },
+    { href: "/categorias", label: "Categorias", icon: TagsIcon },
 ];
+
+const railWrap = (open: boolean, label: string, item: ReactNode) =>
+    open ? (
+        item
+    ) : (
+        <Tooltip content={label} side="right">
+            {item}
+        </Tooltip>
+    );
 
 export const Sidebar = () => {
     const pathname = usePathname();
+    const open = useSidebarStore((state) => state.open);
+    const toggle = useSidebarStore((state) => state.toggle);
     const [settingsOpen, setSettingsOpen] = useState(false);
-
+    useGoToNavigation();
+    useEffect(() => {
+        const handler = (event: KeyboardEvent) => {
+            if (event.key === "b" && (event.metaKey || event.ctrlKey)) {
+                event.preventDefault();
+                useSidebarStore.getState().toggle();
+            }
+        };
+        document.addEventListener("keydown", handler);
+        return () => document.removeEventListener("keydown", handler);
+    }, []);
     return (
         <>
-            <aside className="sticky top-0 h-screen w-65.5 flex-none self-start p-4 print:hidden">
-                <div className="flex h-full flex-col rounded-3xl border border-line bg-white p-4.5 shadow-[0_0.75rem_2.125rem_rgba(123,63,228,0.1)]">
-                    <div className="flex items-center gap-2.75 px-1.5 pt-1.5 pb-4.5">
-                        <div className="flex size-9 items-center justify-center rounded-xl font-head text-[1.1875rem] font-bold text-white brand-mark">
-                            P
-                        </div>
-                        <span className="font-head text-base font-bold text-ink">Patilu Acessórios</span>
-                    </div>
-                    <nav className="flex flex-col gap-1">
-                        {NAV_ITEMS.map(([href, label]) => {
-                            const active = pathname === href;
-                            return (
-                                <Link
-                                    key={href}
-                                    href={href}
-                                    className={`flex items-center gap-2.5 rounded-[0.875rem] px-3.25 py-2.75 text-sm font-semibold transition-all ${
-                                        active ? "bg-primary text-white" : "text-muted hover:bg-hover"
-                                    }`}
-                                >
-                                    {label}
-                                </Link>
-                            );
-                        })}
-                    </nav>
-                    <div className="mt-auto border-t border-line pt-3">
-                        <button
-                            type="button"
-                            onClick={() => setSettingsOpen(true)}
-                            className="flex w-full items-center gap-2.5 rounded-[0.875rem] px-3.25 py-2.75 text-sm font-semibold text-muted transition-all hover:bg-hover hover:text-ink"
-                        >
-                            <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                aria-hidden="true"
-                                className="shrink-0"
+            <aside
+                suppressHydrationWarning
+                className={`group/rail sticky top-0 flex h-svh flex-none flex-col gap-1 overflow-hidden p-2 transition-[width] duration-200 ease-out print:hidden ${
+                    open ? "w-64" : "w-13"
+                }`}
+            >
+                <div className={`flex h-11 shrink-0 items-center gap-2 ${open ? "px-1.5" : "justify-center"}`}>
+                    {open ? (
+                        <>
+                            <span className="flex size-6 shrink-0 items-center justify-center rounded-md text-xs font-bold text-white brand-mark">
+                                P
+                            </span>
+                            <span className="truncate text-sm font-semibold tracking-tight text-ink">
+                                Patilu Acessórios
+                            </span>
+                            <Button
+                                variant="quiet"
+                                onClick={toggle}
+                                ariaLabel="Fechar barra lateral"
+                                ariaExpanded={true}
+                                className="ml-auto size-7 shrink-0 p-0"
                             >
-                                <path
-                                    d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
-                                    stroke="currentColor"
-                                    strokeWidth="1.75"
-                                    strokeLinecap="round"
-                                />
-                                <path
-                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"
-                                    stroke="currentColor"
-                                    strokeWidth="1.75"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            </svg>
-                            Configurações
-                        </button>
-                    </div>
+                                <PanelLeftCloseIcon />
+                            </Button>
+                        </>
+                    ) : (
+                        <Tooltip content="Abrir barra lateral" side="right">
+                            <Button
+                                variant="quiet"
+                                onClick={toggle}
+                                ariaLabel="Abrir barra lateral"
+                                ariaExpanded={false}
+                                className="size-9 p-0"
+                            >
+                                <span className="flex size-6 items-center justify-center rounded-md text-xs font-bold text-white brand-mark group-hover/rail:hidden">
+                                    P
+                                </span>
+                                <PanelLeftOpenIcon className="hidden size-4.5 group-hover/rail:block" />
+                            </Button>
+                        </Tooltip>
+                    )}
+                </div>
+                <nav className="flex flex-col gap-1">
+                    {NAV_ITEMS.map(({ href, label, icon: NavIcon }) => {
+                        const active = pathname === href || pathname.startsWith(`${href}/`);
+                        return (
+                            <Fragment key={href}>
+                                {railWrap(
+                                    open,
+                                    label,
+                                    <Link
+                                        href={href}
+                                        aria-current={active ? "page" : undefined}
+                                        className={`flex h-9 items-center gap-2 rounded-md text-sm font-medium focus-ring transition-colors duration-150 ${
+                                            open ? "px-2.5" : "w-9 justify-center"
+                                        } ${active ? "bg-primary text-white" : "text-ink-muted hover:bg-hover hover:text-ink"}`}
+                                    >
+                                        <NavIcon className="size-4.5 shrink-0" />
+                                        <span className={open ? "truncate" : "sr-only"}>{label}</span>
+                                    </Link>,
+                                )}
+                            </Fragment>
+                        );
+                    })}
+                </nav>
+                <div className="mt-auto flex flex-col border-t border-border pt-2">
+                    {railWrap(
+                        open,
+                        "Configurações",
+                        <Button
+                            variant="quiet"
+                            onClick={() => setSettingsOpen(true)}
+                            className={`h-9 gap-2 text-sm ${open ? "w-full justify-start px-2.5" : "w-9 justify-center self-center p-0"}`}
+                        >
+                            <SettingsIcon className="size-4.5 shrink-0" />
+                            <span className={open ? "truncate" : "sr-only"}>Configurações</span>
+                        </Button>,
+                    )}
                 </div>
             </aside>
             <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />

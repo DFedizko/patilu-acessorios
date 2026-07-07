@@ -15,14 +15,14 @@ export type ApiCategory = {
 };
 
 export type CategoryService = {
-    list: () => Promise<ApiCategory[]>;
+    list: (search?: string) => Promise<ApiCategory[]>;
     create: (input: { name: string }) => Promise<ApiCategory>;
     rename: (input: { id: string; name: string }) => Promise<ApiCategory>;
     remove: (id: string) => Promise<void>;
 };
 
 export const createCategoryService = (http: HttpClient): CategoryService => ({
-    list: () => http.get<ApiCategory[]>("/categories"),
+    list: (search) => http.get<ApiCategory[]>("/categories", search ? { params: { search } } : undefined),
     create: (input) => http.post<ApiCategory>("/categories", input),
     rename: ({ id, name }) => http.patch<ApiCategory>(`/categories/${id}`, { name }),
     remove: (id) => http.delete<void>(`/categories/${id}`),

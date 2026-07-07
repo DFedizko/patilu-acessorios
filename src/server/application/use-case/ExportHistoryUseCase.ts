@@ -5,7 +5,7 @@ import type { IGetHistoryUseCase } from "./contracts/IGetHistoryUseCase";
 import type { IExportHistoryUseCase, Input, Output } from "./contracts/IExportHistoryUseCase";
 import type { HistoryRow } from "@/lib/schemas";
 
-const CSV_HEADER = "Data,Cliente,Hora,Venda,Custo,CPA,Custo fixo,Margem R$,Margem %";
+const CSV_HEADER = "Data,Cliente,Hora,Venda,Custo,CPA,Impostos,Custo fixo,Margem R$,Margem %";
 
 const pad = (n: number): string => n.toString().padStart(2, "0");
 
@@ -29,6 +29,7 @@ const rowToCsvLine = (row: HistoryRow): string => {
         formatMoney(row.saleCents),
         row.itemsCostCents !== null ? formatMoney(row.itemsCostCents) : "",
         formatMoney(row.cpaCents),
+        formatMoney(row.taxCents),
         formatMoney(row.fixedCostCents),
         row.netMarginCents !== null ? formatMoney(row.netMarginCents) : "",
         row.netMarginPct !== null ? row.netMarginPct.toFixed(2) : "",

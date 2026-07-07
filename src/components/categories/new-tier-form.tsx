@@ -7,6 +7,7 @@ import { parseNumber } from "@/utils/format";
 import { useCreateTier } from "@/hooks/mutation/use-create-tier";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import { PlusIcon } from "@/components/ui/icons/plus-icon";
 
 interface NewTierFormProps {
     categoryId: string | null;
@@ -14,7 +15,7 @@ interface NewTierFormProps {
 
 export const NewTierForm = ({ categoryId }: NewTierFormProps) => {
     const createTier = useCreateTier();
-    const { register, handleSubmit, control, reset } = useForm<TierInput>({
+    const { handleSubmit, control, reset } = useForm<TierInput>({
         resolver: zodResolver(tierSchema),
         defaultValues: { name: "", cost: "" },
     });
@@ -25,17 +26,24 @@ export const NewTierForm = ({ categoryId }: NewTierFormProps) => {
         );
     });
     return (
-        <form onSubmit={submit} className="flex items-end gap-2.5 border-t border-line bg-tint px-4.5 py-3.25">
+        <form onSubmit={submit} className="flex items-end gap-2.5 border-t border-border bg-surface-2 px-4.5 py-3.25">
             <Field label="Nova faixa" className="flex-1">
-                <input
-                    {...register("name")}
-                    placeholder="Nome (ex.: Premium)"
-                    className="input-base px-3 py-2.5 text-sm"
+                <Controller
+                    control={control}
+                    name="name"
+                    render={({ field }) => (
+                        <input
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Nome (ex.: Premium)"
+                            className="input-base px-3 py-2.5 text-sm"
+                        />
+                    )}
                 />
             </Field>
             <Field label="Custo" className="w-30">
                 <div className="flex items-center input-base px-2.5">
-                    <span className="text-[0.8125rem] text-muted">R$</span>
+                    <span className="text-sm text-ink-muted">R$</span>
                     <Controller
                         control={control}
                         name="cost"
@@ -51,13 +59,9 @@ export const NewTierForm = ({ categoryId }: NewTierFormProps) => {
                     />
                 </div>
             </Field>
-            <Button
-                variant="ghost"
-                type="submit"
-                disabled={createTier.isPending}
-                className="px-4.5 py-2.75 text-[0.8125rem]"
-            >
-                + Faixa
+            <Button variant="ghost" type="submit" disabled={createTier.isPending} className="px-4.5 py-2.75 text-sm">
+                <PlusIcon className="size-4" />
+                Faixa
             </Button>
         </form>
     );

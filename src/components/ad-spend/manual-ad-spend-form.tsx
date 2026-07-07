@@ -37,8 +37,8 @@ export const ManualAdSpendForm = ({ from }: ManualAdSpendFormProps) => {
     return (
         <div className="flex flex-col gap-3.5 panel-sm px-4.5 py-4">
             <div className="flex flex-col gap-0.75">
-                <span className="font-head text-base font-bold text-ads">Ads indisponível</span>
-                <span className="text-xs/relaxed text-muted">
+                <span className="text-sm font-semibold text-warning">Ads indisponível</span>
+                <span className="text-xs/relaxed text-ink-muted">
                     Não foi possível obter o gasto com anúncios do TikTok para este período. Informe um valor manual
                     para o lucro e o CPA serem calculados.
                 </span>
@@ -53,7 +53,7 @@ export const ManualAdSpendForm = ({ from }: ManualAdSpendFormProps) => {
                         )}
                     />
                     {form.formState.errors.amount && (
-                        <span className="text-xs text-danger">{form.formState.errors.amount.message}</span>
+                        <span className="text-xs text-negative">{form.formState.errors.amount.message}</span>
                     )}
                 </Field>
                 <Button type="submit" disabled={mutation.isPending} className="px-6 py-3.25 text-sm">

@@ -25,21 +25,21 @@ export const CategoryHeader = ({ category }: CategoryHeaderProps) => {
     };
     if (editing) {
         return (
-            <div className="flex items-center gap-2.5 bg-tint px-4.5 py-3.5">
+            <div className="flex items-center gap-2.5 bg-surface-2 px-4.5 py-3.5">
                 <input
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                     className="flex-1 input-base px-3 py-2.25 text-base font-bold"
                 />
-                <Button onClick={save} disabled={renameCategory.isPending} className="px-4 py-2.25 text-[0.8125rem]">
+                <Button onClick={save} disabled={renameCategory.isPending} className="px-4 py-2.25 text-xs">
                     Salvar
                 </Button>
             </div>
         );
     }
     return (
-        <div className="flex items-center gap-2.5 bg-tint px-4.5 py-3.5">
-            <h3 className="m-0 flex-1 font-head text-lg font-bold text-ink">{category.name}</h3>
+        <div className="flex items-center gap-2.5 bg-surface-2 px-4.5 py-3.5">
+            <h3 className="m-0 flex-1 text-base font-semibold text-ink">{category.name}</h3>
             {categoryId && (
                 <>
                     <Button
@@ -48,15 +48,15 @@ export const CategoryHeader = ({ category }: CategoryHeaderProps) => {
                             setName(category.name);
                             setEditing(true);
                         }}
-                        className="px-3.5 py-2 text-[0.8125rem]"
+                        className="px-3.5 py-2 text-xs"
                     >
                         Renomear
                     </Button>
                     <Button
                         variant="dangerOutline"
-                        onClick={() => deleteCategory.mutate(categoryId)}
+                        onClick={() => deleteCategory.removeWithUndo({ id: categoryId, name: category.name })}
                         disabled={deleteCategory.isPending}
-                        className="px-3.5 py-2 text-[0.8125rem]"
+                        className="px-3.5 py-2 text-xs"
                     >
                         Excluir
                     </Button>

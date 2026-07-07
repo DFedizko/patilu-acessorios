@@ -4,7 +4,7 @@ import { useSignIn } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { GoogleLogo } from "@/assets/google-logo";
 
-const AFTER_SIGN_IN_URL = "/pack";
+const AFTER_SIGN_IN_URL = "/pedidos";
 
 export const GoogleSignInButton = () => {
     const { signIn } = useSignIn();

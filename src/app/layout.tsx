@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Baloo_2, Inter } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
+import "@themes/orchid-theme.css";
 import "@/app/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
@@ -7,16 +8,14 @@ import { Providers } from "@/app/providers";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Toaster } from "@/components/feedback/toaster";
 
-const baloo = Baloo_2({
+const geistSans = Geist({
     subsets: ["latin"],
-    weight: ["500", "600", "700"],
-    variable: "--font-baloo",
+    variable: "--font-geist-sans",
 });
 
-const inter = Inter({
+const geistMono = Geist_Mono({
     subsets: ["latin"],
-    weight: ["400", "500", "600", "700"],
-    variable: "--font-inter",
+    variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
@@ -31,15 +30,25 @@ export default async function RootLayout({
 }>) {
     const { userId } = await auth();
     return (
-        <html lang="pt-BR">
-            <body className={`${baloo.variable} ${inter.variable} font-sans text-ink antialiased`}>
+        <html lang="pt-BR" data-theme="orchid">
+            <body
+                className={`${geistSans.variable} ${geistMono.variable} bg-background font-sans text-ink antialiased`}
+            >
                 <ClerkProvider>
                     <Providers>
-                        <div className="flex min-h-screen app-bg">
-                            {userId && <Sidebar />}
-                            <main className="min-w-0 flex-1 px-7.5 pt-7 pb-10">{children}</main>
-                            <Toaster />
-                        </div>
+                        {userId ? (
+                            <div className="flex min-h-svh">
+                                <Sidebar />
+                                <div className="flex h-svh min-w-0 flex-1 flex-col p-2 pl-0 print:h-auto print:p-0">
+                                    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-xs print:overflow-visible print:rounded-none print:border-none print:shadow-none">
+                                        {children}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <main className="flex min-h-svh">{children}</main>
+                        )}
+                        <Toaster />
                     </Providers>
                 </ClerkProvider>
             </body>

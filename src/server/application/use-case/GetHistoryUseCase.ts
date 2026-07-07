@@ -41,6 +41,7 @@ export class GetHistoryUseCase implements IGetHistoryUseCase {
                 orderCount: orders.length,
                 revenueCents: periodProfit.revenue.toCents(),
                 costCents: periodProfit.cost.toCents(),
+                taxCents: periodProfit.tax.toCents(),
                 totalAdsCents: totalAds.toCents(),
                 profitCents: periodProfit.profit.toCents(),
                 avgMarginPct: periodProfit.avgMarginPct,
@@ -57,6 +58,7 @@ export class GetHistoryUseCase implements IGetHistoryUseCase {
             saleCents: order.sale.toCents(),
             itemsCostCents: order.itemsCost !== null ? order.itemsCost.toCents() : null,
             cpaCents: cpa.toCents(),
+            taxCents: this.calculator.computeTax(order.sale).toCents(),
             fixedCostCents: fixedCost.toCents(),
         };
         if (order.itemsCost === null) {

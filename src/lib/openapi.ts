@@ -78,11 +78,27 @@ export function getOpenApiDocument() {
                 get: {
                     operationId: "listCatalog",
                     summary: "Lista categorias com suas faixas (+ Sem categoria)",
+                    description:
+                        "Categorias e faixas são ordenadas pela data de criação (mais antigas primeiro). O parâmetro `search` faz busca aproximada (case-insensitive, por trecho) que dá match em nome de categoria OU de faixa.",
                     tags: ["Categories"],
+                    parameters: [
+                        {
+                            name: "search",
+                            in: "query",
+                            required: false,
+                            description:
+                                "Termo de busca aproximada por nome de categoria ou faixa. Retorna categorias cujo nome contém o termo (com todas as faixas) e categorias que possuem faixas correspondentes (apenas as faixas que deram match).",
+                            schema: { type: "string" },
+                        },
+                    ],
                     responses: {
                         "200": {
                             description: "Catálogo de categorias com faixas",
                             content: { "application/json": { schema: z.array(categoryWithTiersSchema) } },
+                        },
+                        "400": {
+                            description: "Parâmetros inválidos",
+                            content: { "application/json": { schema: validationErrorSchema } },
                         },
                     },
                 },
@@ -567,6 +583,7 @@ export function getOpenApiDocument() {
                                                 saleCents: z.number().int(),
                                                 itemsCostCents: z.number().int().nullable(),
                                                 cpaCents: z.number().int(),
+                                                taxCents: z.number().int(),
                                                 fixedCostCents: z.number().int(),
                                                 netMarginCents: z.number().int().nullable(),
                                                 netMarginPct: z.number().nullable(),
@@ -576,6 +593,7 @@ export function getOpenApiDocument() {
                                             orderCount: z.number().int(),
                                             revenueCents: z.number().int(),
                                             costCents: z.number().int(),
+                                            taxCents: z.number().int(),
                                             totalAdsCents: z.number().int(),
                                             profitCents: z.number().int(),
                                             avgMarginPct: z.number(),
@@ -599,7 +617,7 @@ export function getOpenApiDocument() {
                 get: {
                     operationId: "exportHistory",
                     summary:
-                        "Exporta os pedidos do período em CSV (Data, Cliente, Hora, Venda, Custo, CPA, Custo fixo, Margem R$, Margem %)",
+                        "Exporta os pedidos do período em CSV (Data, Cliente, Hora, Venda, Custo, CPA, Impostos, Custo fixo, Margem R$, Margem %)",
                     tags: ["History"],
                     parameters: [
                         {

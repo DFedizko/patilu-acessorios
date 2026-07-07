@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { useModalAnimation, type ModalAnimation, type ModalDirection } from "./use-modal-animation";
+import styles from "./animations.module.css";
 
 export type ModalSize = "xs" | "sm" | "md" | "lg" | "xl";
 
@@ -16,15 +16,12 @@ const SIZE_CLASSES: Record<ModalSize, string> = {
 interface ModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    animation?: ModalAnimation;
-    direction?: ModalDirection;
     size?: ModalSize;
     children: ReactNode;
 }
 
-export const Modal = ({ open, onOpenChange, animation = "fade", direction = "bottom", size, children }: ModalProps) => {
+export const Modal = ({ open, onOpenChange, size, children }: ModalProps) => {
     const dialogRef = useRef<HTMLDivElement>(null);
-    const animationClass = useModalAnimation(animation, direction);
 
     useEffect(() => {
         if (!open) return;
@@ -59,7 +56,7 @@ export const Modal = ({ open, onOpenChange, animation = "fade", direction = "bot
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center modal-overlay"
+            className={`fixed inset-0 z-50 flex items-center justify-center modal-overlay ${styles.overlay}`}
             onClick={() => onOpenChange(false)}
             aria-modal="true"
             role="dialog"
@@ -67,7 +64,7 @@ export const Modal = ({ open, onOpenChange, animation = "fade", direction = "bot
             <div
                 ref={dialogRef}
                 tabIndex={-1}
-                className={`rounded-[1.375rem] bg-white shadow-[0_1.5rem_3.5rem_rgba(20,12,40,0.22)] outline-none ${shapeClass} ${animationClass}`}
+                className={`rounded-xl bg-surface shadow-pop outline-none ${shapeClass} ${styles.content}`}
                 onClick={(event) => event.stopPropagation()}
             >
                 {children}

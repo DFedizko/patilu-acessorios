@@ -27,20 +27,20 @@ export const AdsInvestmentPanel = ({ period, from, to, totalAdsCents, orderCount
             {adSpend && !adSpend.available && <ManualAdSpendForm from={from} />}
             <div className="flex flex-wrap items-end gap-4.5 panel-sm px-4.5 py-4">
                 <div className="flex flex-col gap-0.75">
-                    <span className="text-xs font-semibold text-muted">Total de ads no período</span>
-                    <span className="font-head text-2xl font-bold text-ads tabular-nums">
+                    <span className="text-xs font-medium text-ink-muted">Total de ads no período</span>
+                    <span className="font-mono text-2xl font-semibold tracking-tight text-ink tabular-nums">
                         {formatCurrency(totalAdsCents / 100)}
                     </span>
                 </div>
                 <div className="flex flex-col gap-0.75">
-                    <span className="text-xs font-semibold text-muted">CPA médio por pedido</span>
-                    <span className="font-head text-2xl font-bold text-accent tabular-nums">
+                    <span className="text-xs font-medium text-ink-muted">CPA médio por pedido</span>
+                    <span className="font-mono text-2xl font-semibold tracking-tight text-ink tabular-nums">
                         {formatCurrency(adsPerOrder / 100)}
                     </span>
                 </div>
                 <div className="flex-1" />
                 <Button onClick={handleExport} className="px-5 py-3.25 text-sm">
-                    ↓ Exportar para Excel
+                    Exportar para Excel
                 </Button>
             </div>
         </div>

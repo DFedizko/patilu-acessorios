@@ -15,16 +15,16 @@ interface ModalSidebarProps {
 }
 
 export const ModalSidebar = ({ tabs, activeTab, onTabChange }: ModalSidebarProps) => (
-    <div className="flex w-44 flex-none flex-col gap-0.5 border-r border-line bg-tint p-3">
+    <div className="flex w-44 flex-none flex-col gap-0.5 border-r border-border bg-surface-2 p-3">
         {tabs.map((tab) => (
             <button
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
-                className={`flex items-center gap-2.5 rounded-[0.875rem] px-3 py-2.5 text-left text-sm font-semibold transition-colors ${
+                className={`flex items-center gap-2.5 rounded-md px-3 py-2.5 text-left text-sm font-medium focus-ring transition-colors duration-150 ${
                     activeTab === tab.id
-                        ? "bg-white text-primary shadow-[0_0.125rem_0.5rem_rgba(123,63,228,0.1)]"
-                        : "text-muted hover:bg-white/60 hover:text-ink"
+                        ? "bg-surface text-primary shadow-xs"
+                        : "text-ink-muted hover:bg-surface/60 hover:text-ink"
                 }`}
             >
                 {tab.icon && <span className="shrink-0">{tab.icon}</span>}

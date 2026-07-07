@@ -56,7 +56,7 @@ describe("ExportHistoryUseCase", () => {
         exportHistory = new ExportHistoryUseCase(getHistory);
     });
 
-    it("generates CSV with the 9 required columns in the header", async () => {
+    it("generates CSV with the 10 required columns in the header", async () => {
         // Arrange — empty database
 
         // Act
@@ -65,13 +65,13 @@ describe("ExportHistoryUseCase", () => {
         // Assert
         const header = csv.split("\n")[0]!;
         const columns = header.split(",");
-        expect(columns).toHaveLength(9);
-        expect(header).toBe("Data,Cliente,Hora,Venda,Custo,CPA,Custo fixo,Margem R$,Margem %");
+        expect(columns).toHaveLength(10);
+        expect(header).toBe("Data,Cliente,Hora,Venda,Custo,CPA,Impostos,Custo fixo,Margem R$,Margem %");
     });
 
     it("generates one data row per order with correct column values", async () => {
         // Arrange — 1 packed order, 1000 cents ads
-        // sale=5000, shipping=500, tier 300×2=600, CPA=1000, fixedCost=300, netMargin=2600
+        // sale=5000, shipping=500, tier 300×2=600, CPA=1000, tax=210, fixedCost=300, netMargin=2390
         const order = await givenOrder({
             saleCents: 5000,
             shippingCents: 500,
@@ -105,8 +105,9 @@ describe("ExportHistoryUseCase", () => {
         expect(cells[3]).toBe("50.00"); // Venda (5000 cents = R$50.00)
         expect(cells[4]).toBe("6.00"); // Custo (600 cents = R$6.00)
         expect(cells[5]).toBe("10.00"); // CPA (1000 cents = R$10.00)
-        expect(cells[6]).toBe("3.00"); // Custo fixo (300 cents default = R$3.00)
-        expect(cells[7]).toBe("26.00"); // Margem R$ (2600 cents = R$26.00)
+        expect(cells[6]).toBe("2.10"); // Impostos (4.2% of 5000 = 210 cents = R$2.10)
+        expect(cells[7]).toBe("3.00"); // Custo fixo (300 cents default = R$3.00)
+        expect(cells[8]).toBe("23.90"); // Margem R$ (2390 cents = R$23.90)
     });
 
     it("leaves cost and margin cells empty for non-packed orders", async () => {
@@ -121,7 +122,7 @@ describe("ExportHistoryUseCase", () => {
         expect(lines).toHaveLength(2);
         const cells = lines[1]!.split(",");
         expect(cells[4]).toBe(""); // Custo — empty for non-packed
-        expect(cells[7]).toBe(""); // Margem R$ — empty for non-packed
-        expect(cells[8]).toBe(""); // Margem % — empty for non-packed
+        expect(cells[8]).toBe(""); // Margem R$ — empty for non-packed
+        expect(cells[9]).toBe(""); // Margem % — empty for non-packed
     });
 });

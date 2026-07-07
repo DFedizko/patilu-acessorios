@@ -11,14 +11,26 @@ export type OrderInPeriod = {
 
 const pad = (n: number): string => n.toString().padStart(2, "0");
 
+const TAX_RATE = 0.042;
+
 export class PeriodReportCalculator {
     computeCpa(totalAds: Money, orderCount: number): Money {
         return totalAds.dividedByCount(orderCount);
     }
 
+    computeTax(sale: Money): Money {
+        return sale.multiplyByQuantity(TAX_RATE);
+    }
+
     computeNetMarginPerOrder(order: OrderInPeriod, cpa: Money, fixedCost: Money): { value: Money; pct: number } {
         const cost = order.itemsCost ?? Money.zero();
-        const value = order.sale.subtract(cost).subtract(order.shipping).subtract(cpa).subtract(fixedCost);
+        const tax = this.computeTax(order.sale);
+        const value = order.sale
+            .subtract(cost)
+            .subtract(order.shipping)
+            .subtract(cpa)
+            .subtract(fixedCost)
+            .subtract(tax);
         return { value, pct: value.percentageOf(order.sale) };
     }
 
@@ -26,13 +38,19 @@ export class PeriodReportCalculator {
         orders: OrderInPeriod[],
         totalAds: Money,
         fixedCost: Money,
-    ): { revenue: Money; cost: Money; profit: Money; avgMarginPct: number } {
+    ): { revenue: Money; cost: Money; tax: Money; profit: Money; avgMarginPct: number } {
         const revenue = orders.reduce((acc, o) => acc.add(o.sale), Money.zero());
         const cost = orders.reduce((acc, o) => acc.add(o.itemsCost ?? Money.zero()), Money.zero());
         const totalShipping = orders.reduce((acc, o) => acc.add(o.shipping), Money.zero());
+        const tax = orders.reduce((acc, o) => acc.add(this.computeTax(o.sale)), Money.zero());
         const fixedCostTotal = fixedCost.multiplyByQuantity(orders.length);
-        const profit = revenue.subtract(cost).subtract(totalShipping).subtract(totalAds).subtract(fixedCostTotal);
-        return { revenue, cost, profit, avgMarginPct: profit.percentageOf(revenue) };
+        const profit = revenue
+            .subtract(cost)
+            .subtract(totalShipping)
+            .subtract(totalAds)
+            .subtract(fixedCostTotal)
+            .subtract(tax);
+        return { revenue, cost, tax, profit, avgMarginPct: profit.percentageOf(revenue) };
     }
 
     computeCostByCategory(orders: OrderInPeriod[]): { categoryName: string; cost: Money }[] {

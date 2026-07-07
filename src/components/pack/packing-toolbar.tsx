@@ -5,6 +5,7 @@ import { BarcodeScanner } from "@/components/pack/barcode-scanner";
 import { LooseItemForm } from "@/components/pack/loose-item-form";
 import { LooseItemChips } from "@/components/pack/loose-item-chips";
 import { Button } from "@/components/ui/button";
+import { PlusIcon } from "@/components/ui/icons/plus-icon";
 
 export const PackingToolbar = () => {
     const [formOpen, setFormOpen] = useState(false);
@@ -17,7 +18,8 @@ export const PackingToolbar = () => {
                     onClick={() => setFormOpen((open) => !open)}
                     className="self-stretch px-5 py-3.5 text-sm"
                 >
-                    + Item avulso
+                    <PlusIcon className="size-4" />
+                    Item avulso
                 </Button>
             </div>
             {formOpen && <LooseItemForm onAdded={() => setFormOpen(false)} />}

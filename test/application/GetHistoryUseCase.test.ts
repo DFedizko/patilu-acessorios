@@ -100,11 +100,11 @@ describe("GetHistoryUseCase", () => {
         expect(result.rows[0]!.cpaCents).toBe(0);
     });
 
-    it("computes net margin per order = sale - itemsCost - shipping - CPA - fixedCost", async () => {
+    it("computes net margin per order = sale - itemsCost - shipping - CPA - tax - fixedCost", async () => {
         // Arrange
         // sale=5000, shipping=500, tier cost=300×2=600, ads=1000, fixedCost=300 (default)
-        // CPA = 1000 / 1 = 1000
-        // netMargin = 5000 - 600 - 500 - 1000 - 300 = 2600
+        // CPA = 1000 / 1 = 1000; tax = 4.2% of 5000 = 210
+        // netMargin = 5000 - 600 - 500 - 1000 - 300 - 210 = 2390
         const order = await givenOrder({ saleCents: 5000, shippingCents: 500, orderedAt: daysAgo(1) });
         const tier = await givenTier({ costCents: 300 });
         await savePacking.execute({
@@ -128,9 +128,10 @@ describe("GetHistoryUseCase", () => {
         expect(row.saleCents).toBe(5000);
         expect(row.itemsCostCents).toBe(600);
         expect(row.cpaCents).toBe(1000);
+        expect(row.taxCents).toBe(210);
         expect(row.fixedCostCents).toBe(300);
-        expect(row.netMarginCents).toBe(2600);
-        expect(Math.round(row.netMarginPct!)).toBe(Math.round((2600 / 5000) * 100));
+        expect(row.netMarginCents).toBe(2390);
+        expect(Math.round(row.netMarginPct!)).toBe(Math.round((2390 / 5000) * 100));
     });
 
     it("uses frozen snapshot values (not current tier cost)", async () => {
@@ -174,7 +175,8 @@ describe("GetHistoryUseCase", () => {
         // ads=2000, fixedCost=300 (default)
         // CPA = 2000 / 2 = 1000 each
         // revenue=10000, itemsCost=1000, shipping=500, ads=2000, fixedCost=600
-        // profit = 10000 - 1000 - 500 - 2000 - 600 = 5900
+        // tax = 4.2% of 4000 + 4.2% of 6000 = 168 + 252 = 420
+        // profit = 10000 - 1000 - 500 - 2000 - 600 - 420 = 5480
         const tier1 = await givenTier({ costCents: 200 });
         const tier2 = await givenTier({ costCents: 300 });
         const order1 = await givenOrder({ saleCents: 4000, shippingCents: 200, orderedAt: daysAgo(1) });
@@ -205,7 +207,8 @@ describe("GetHistoryUseCase", () => {
         expect(result.summary.orderCount).toBe(2);
         expect(result.summary.revenueCents).toBe(10000);
         expect(result.summary.costCents).toBe(1000);
+        expect(result.summary.taxCents).toBe(420);
         expect(result.summary.totalAdsCents).toBe(2000);
-        expect(result.summary.profitCents).toBe(5900);
+        expect(result.summary.profitCents).toBe(5480);
     });
 });

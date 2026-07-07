@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
     },
     reactCompiler: true,
     serverExternalPackages: ["pg-cloudflare", "pg-native"],
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "www.clerk.com",
+                pathname: "**",
+            },
+        ],
+    },
 };
 
 initOpenNextCloudflareForDev();

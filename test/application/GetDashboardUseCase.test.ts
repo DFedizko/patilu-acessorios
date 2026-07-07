@@ -60,7 +60,7 @@ describe("GetDashboardUseCase", () => {
         expect(result.costByCategory).toHaveLength(0);
     });
 
-    it("computes profit = revenue − itemsCost − shipping − ads − (fixedCost × orderCount)", async () => {
+    it("computes profit = revenue − itemsCost − shipping − ads − (fixedCost × orderCount) − tax", async () => {
         // Arrange
         const order = await givenOrder({ saleCents: 5000, shippingCents: 500, orderedAt: daysAgo(1) });
         const tier = await givenTier({ costCents: 300 });
@@ -81,7 +81,8 @@ describe("GetDashboardUseCase", () => {
         expect(result.costCents).toBe(600);
         expect(result.adsCents).toBe(1000);
         expect(result.fixedTotalCents).toBe(300);
-        expect(result.profitCents).toBe(2600);
+        // tax = 4.2% of 5000 = 210; profit = 5000 - 600 - 500 - 1000 - 300 - 210 = 2390
+        expect(result.profitCents).toBe(2390);
     });
 
     it("groups costByCategory by frozen category name, excludes loose items from buckets but counts them in total cost", async () => {

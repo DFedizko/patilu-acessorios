@@ -3,7 +3,7 @@
 import { Toaster as SonnerToaster } from "sonner";
 
 const TOAST_CLASS =
-    "flex w-full items-center gap-2 rounded-full px-5.5 py-3.5 text-sm font-semibold text-white shadow-[0_1rem_2.5rem_rgba(20,12,40,0.4)]";
+    "flex w-full items-center gap-2 rounded-full px-5.5 py-3.5 text-sm font-semibold text-white shadow-pop";
 
 export const Toaster = () => (
     <SonnerToaster
@@ -12,11 +12,13 @@ export const Toaster = () => (
             unstyled: true,
             classNames: {
                 toast: TOAST_CLASS,
-                default: "bg-dark",
-                success: "bg-good",
-                error: "bg-danger",
-                warning: "bg-warn",
-                info: "bg-dark",
+                default: "bg-ink",
+                success: "bg-positive",
+                error: "bg-negative",
+                warning: "bg-warning",
+                info: "bg-ink",
+                actionButton:
+                    "ml-2 shrink-0 cursor-pointer rounded-full border-none bg-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors duration-150 hover:bg-white/30",
             },
         }}
     />

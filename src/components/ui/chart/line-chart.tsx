@@ -104,7 +104,7 @@ export const LineChart = ({
                             x2={width - PADDING_X}
                             y1={PADDING_Y + ratio * (height - 2 * PADDING_Y)}
                             y2={PADDING_Y + ratio * (height - 2 * PADDING_Y)}
-                            stroke="var(--color-line)"
+                            stroke="var(--color-border)"
                             strokeWidth={1}
                         />
                     ))}
@@ -124,7 +124,7 @@ export const LineChart = ({
                                 cx={x}
                                 cy={ys[index]}
                                 r={active === index ? 5 : 4}
-                                fill="#fff"
+                                fill="var(--color-surface)"
                                 stroke="var(--color-primary)"
                                 strokeWidth={active === index ? 3 : 2.5}
                             />

@@ -6,9 +6,7 @@ interface DataTableHeaderProps {
 }
 
 export const DataTableHeader = ({ gridCols, children }: DataTableHeaderProps) => (
-    <div
-        className={`grid ${gridCols} gap-3 bg-tint px-4.5 py-3.25 text-[0.6875rem] font-bold tracking-[0.06em] text-muted uppercase`}
-    >
+    <div className={`grid ${gridCols} gap-3 bg-surface-2 px-4.5 py-3 text-xs font-medium text-ink-muted`}>
         {children}
     </div>
 );

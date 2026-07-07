@@ -20,6 +20,10 @@ Patilu Kits is the internal tool of **Patilu Acessórios**, a stationery store t
 - **zod-openapi** + **Scalar** (Swagger) for automatic API documentation
 - **ESLint** + **Prettier** for linting and formatting
 
+## Design system
+
+**Before any UI work, read `docs/DESIGN.md`** (design tokens, app shell, motion, behavioral standards, anti-pattern bans) **and `docs/TYPOGRAPHY.md`** (Geist Sans/Mono type system). They are the canonical law for every current and future page. Hard rules: never `px` (CSS tokens → Tailwind utilities → `rem`), colors only via theme tokens (`themes/`), money values in Geist Mono with conditional semantic colors (a loss is never green/purple).
+
 ## Deployment
 
 Deployed to **Cloudflare Workers** (via `@opennextjs/cloudflare`) with **Neon** Postgres in São Paulo, free tier, CI/CD on push to `main` (`.github/workflows/ci.yml`). Neon queries run over HTTP (`neonConfig.poolQueryViaFetch = true` in `src/lib/prisma.ts`) to avoid WebSocket cold-start failures on Workers.
@@ -211,8 +215,8 @@ export class CreateTierUseCase implements ICreateTierUseCase {
     "error": {
         "code": "TIER_COST_MUST_BE_POSITIVE", // our code, UPPER_SNAKE_CASE
         "message": "technical message (logs/dev)",
-        "fields": { "costReais": ["Informe um custo válido"] } // only on VALIDATION_ERROR
-    }
+        "fields": { "costReais": ["Informe um custo válido"] }, // only on VALIDATION_ERROR
+    },
 }
 ```
 
@@ -220,7 +224,7 @@ export class CreateTierUseCase implements ICreateTierUseCase {
 
 - **Validation (Zod)** — at the **route** (HTTP edge). On `safeParse` failure → `400` `VALIDATION_ERROR`, with `fields` listing **exactly** the fields that are wrong or missing.
 - **Business rule** — in the **entity / domain service**, as a `DomainError` subclass carrying `code` + `httpStatus`. The route maps it to **422**.
-- **Not found** — thrown **directly in the repository/gateway** (when a lookup by id/name/code finds nothing), **never in a use case**. It is a dedicated **`NotFoundError`** in `src/server/infrastructure/errors/NotFoundError.ts` (it `extends Error`, **not** `DomainError`). Its `httpStatus` is **always `404`** (never a constructor parameter); it has a **default message and a default code (`NOT_FOUND`)**, but both **may be overridden** via constructor args — pass a specific `code` (e.g. `CATEGORY_NOT_FOUND`, `TIER_NOT_FOUND`, `ORDER_NOT_FOUND`) and a template-literal message identifying which aggregate/record/id was not found (e.g. `new NotFoundError(\`Category not found: ${id}\`, "CATEGORY_NOT_FOUND")`). The repository's `findById`/`findByX` that must resolve a record **throws** `NotFoundError` instead of returning `null`. `toHttpResponse` handles `NotFoundError` alongside `DomainError`.
+- **Not found** — thrown **directly in the repository/gateway** (when a lookup by id/name/code finds nothing), **never in a use case**. It is a dedicated **`NotFoundError`** in `src/server/infrastructure/errors/NotFoundError.ts` (it `extends Error`, **not** `DomainError`). Its `httpStatus` is **always `404`** (never a constructor parameter); it has a **default message and a default code (`NOT_FOUND`)**, but both **may be overridden** via constructor args — pass a specific `code` (e.g. `CATEGORY_NOT_FOUND`, `TIER_NOT_FOUND`, `ORDER_NOT_FOUND`) and a template-literal message identifying which aggregate/record/id was not found (e.g. `new NotFoundError(\`Category not found: ${id}\`, "CATEGORY_NOT_FOUND")`). The repository's `findById`/`findByX`that must resolve a record **throws**`NotFoundError`instead of returning`null`. `toHttpResponse`handles`NotFoundError`alongside`DomainError`.
 - **External API errors** — thrown **directly in the HTTP gateway** of the integration → **502**.
 - **Unauthenticated** — Clerk (`proxy.ts` / handler `auth()`), `401` `UNAUTHENTICATED`.
 - **Internal/unhandled** → `500` `INTERNAL_ERROR`.
@@ -241,7 +245,7 @@ Routes wrap the use case in `try/catch` and use a central helper (`src/lib/http-
 - **Setup is folded into `bun run db:migrate`:** it migrates the dev DB (`prisma migrate dev`) and then creates + migrates the test DB (`scripts/setup-test-db.ts` → `prisma migrate deploy` against `TEST_DATABASE_URL`, which creates it if missing). No separate test-DB command to run.
 - **One integration test per use case** (covering the critical path + main business-rule errors). **Unit tests** cover entity behavior, value objects, and domain services.
 - **AAA pattern (Arrange, Act, Assert)** in **every** test — the three blocks visibly separated.
-- **Tests must be well-defined with acceptance criteria:** for each use case and entity/domain service, state explicitly *what behavior the test guarantees* (the expected business outcome), so the suite proves the software works as intended.
+- **Tests must be well-defined with acceptance criteria:** for each use case and entity/domain service, state explicitly _what behavior the test guarantees_ (the expected business outcome), so the suite proves the software works as intended.
 - **Test only what matters:** the most critical system behaviors and the entities' units. Aim for **high-quality assertions** (assert the business outcome, not incidental details). **Coverage metrics are not a goal.**
 
 ## Coding standards
@@ -293,6 +297,8 @@ Routes wrap the use case in `try/catch` and use a central helper (`src/lib/http-
 - **Pages are Server Components.** Write the page markup directly in `page.tsx` and extract Client Components only for the parts that genuinely need state/interactivity. Never create a single root `"use client"` component (e.g. a `*-screen.tsx`) that holds the whole page — that is equivalent to making the page itself a Client Component (anti-pattern). When a piece of local state must be shared across an interactive section, keep the static, server-rendered chrome (titles, descriptions) in `page.tsx` and pass it into the client island via props/`children`.
 - Avoid components over 300 lines.
 - Keep simple, local UI state in the component itself with `useState` (always use relative state). Use Zustand **only** for state that is genuinely shared across components, to avoid prop drilling — never for local state.
+- **Prefer Zustand over React Context** for shared client state — global module-level stores (`create`) in `src/stores/`, no custom context providers.
+- **Prefer semantic HTML tags** (`header`, `main`, `nav`, `aside`, `section`, `footer`, `h1`…); use `div` only for genuinely generic containers.
 - Avoid more than 5 props per component, except UI actions (`onClick`, `onDragEnd`, etc.); manage state with Zustand to avoid "prop-calypse".
 - **Maximize reusability.** Before writing UI, look for an existing primitive in the project to reuse (buttons in `components/ui/button.tsx`, plus forms, inputs, labels, etc.). If a suitable primitive does not exist, create it under `components/ui/` and use it everywhere — always built with Tailwind utilities and CSS tokens. Standardize buttons through the `Button` primitive and its variants; never style one-off `<button>` elements.
 - Use Tailwind for styling; never styled-components.

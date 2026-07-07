@@ -8,6 +8,7 @@ import { usePackingStore } from "@/stores/use-packing-store";
 import { useSavePacking } from "@/hooks/mutation/use-save-packing";
 import { useDeletePacking } from "@/hooks/mutation/use-delete-packing";
 import { formatCurrency, formatPercent } from "@/utils/format";
+import { moneyToneClass } from "@/utils/money-tone";
 import { Button } from "@/components/ui/button";
 
 interface PackingSummaryBarProps {
@@ -62,24 +63,28 @@ export const PackingSummaryBar = ({ orderId }: PackingSummaryBarProps) => {
         <div className="sticky bottom-0 z-20 mt-1.5 flex items-center gap-6 floating-bar px-5 py-3.5 print:hidden">
             <div className="flex flex-wrap gap-6">
                 <div>
-                    <div className="text-[0.6875rem] font-semibold text-muted">Custo dos itens</div>
-                    <div className="text-lg font-bold text-ink tabular-nums">{formatCurrency(itemsCost)}</div>
+                    <div className="text-xs font-medium text-ink-muted">Custo dos itens</div>
+                    <div className="font-mono text-lg font-semibold text-ink tabular-nums">
+                        {formatCurrency(itemsCost)}
+                    </div>
                 </div>
                 <div>
-                    <div className="text-[0.6875rem] font-semibold text-muted">Itens</div>
-                    <div className="text-lg font-bold text-ink tabular-nums">{count}</div>
+                    <div className="text-xs font-medium text-ink-muted">Itens</div>
+                    <div className="font-mono text-lg font-semibold text-ink tabular-nums">{count}</div>
                 </div>
             </div>
             <div className="flex-1" />
             <div className="flex items-center gap-4.5">
                 <div className="text-right">
                     <div className="flex items-baseline justify-end gap-2">
-                        <span className="text-xs font-semibold text-muted">Margem</span>
-                        <span className="font-head text-[2.875rem] leading-[.9] font-bold text-primary tabular-nums">
+                        <span className="text-xs font-medium text-ink-muted">Margem</span>
+                        <span
+                            className={`font-mono text-5xl leading-[.9] font-semibold tracking-tight tabular-nums ${moneyToneClass(marginValue)}`}
+                        >
                             {formatCurrency(marginValue)}
                         </span>
                     </div>
-                    <div className="mt-0.75 text-[0.8125rem] font-semibold text-muted">
+                    <div className="mt-0.75 text-sm font-medium text-ink-muted">
                         {formatPercent(marginPct)} de margem
                     </div>
                 </div>

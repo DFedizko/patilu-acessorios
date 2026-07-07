@@ -1,5 +1,5 @@
 import { SsoCallbackHandler } from "@/components/auth/sso-callback-handler";
 
-export default function SsoCallbackPage() {
+export default function Page() {
     return <SsoCallbackHandler />;
 }

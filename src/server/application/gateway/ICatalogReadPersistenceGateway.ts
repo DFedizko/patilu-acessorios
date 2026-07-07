@@ -13,5 +13,5 @@ export type CategoryWithTiers = {
 };
 
 export interface ICatalogReadPersistenceGateway {
-    listCatalog(): Promise<CategoryWithTiers[]>;
+    listCatalog(search?: string): Promise<CategoryWithTiers[]>;
 }

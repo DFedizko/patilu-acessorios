@@ -11,15 +11,17 @@ export const CategoryCostPanel = ({ costByCategory }: CategoryCostPanelProps) =>
     const maxCost = Math.max(...costByCategory.map((c) => c.costCents), 1);
     return (
         <div className="flex flex-col gap-4 panel p-5">
-            <div className="text-[0.9375rem] font-bold text-ink">Custo por categoria</div>
+            <div className="text-sm font-semibold text-ink">Custo por categoria</div>
             <div className="flex flex-col gap-3.5">
                 {costByCategory.map((item, index) => (
                     <div key={item.categoryName} className="flex flex-col gap-1.5">
-                        <div className="flex justify-between text-[0.8125rem]">
+                        <div className="flex justify-between text-sm">
                             <span className="font-semibold text-ink">{item.categoryName}</span>
-                            <span className="text-muted tabular-nums">{formatCurrency(item.costCents / 100)}</span>
+                            <span className="font-mono text-ink-muted tabular-nums">
+                                {formatCurrency(item.costCents / 100)}
+                            </span>
                         </div>
-                        <div className="h-2.5 overflow-hidden rounded-full bg-line">
+                        <div className="h-2.5 overflow-hidden rounded-full bg-border">
                             <div
                                 className={`h-full rounded-full ${BAR_COLORS[index % BAR_COLORS.length]}`}
                                 style={{ width: `${Math.round((item.costCents / maxCost) * 100)}%` }}

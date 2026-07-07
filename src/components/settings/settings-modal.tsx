@@ -25,7 +25,7 @@ export const SettingsModal = ({ open, onOpenChange }: SettingsModalProps) => {
     const [activeTab, setActiveTab] = useState<TabId>("fixed-cost");
 
     return (
-        <Modal open={open} onOpenChange={onOpenChange} animation="zoom" size="lg">
+        <Modal open={open} onOpenChange={onOpenChange} size="lg">
             <ModalHeader onClose={() => onOpenChange(false)}>Configurações</ModalHeader>
             <ModalBody>
                 <ModalSidebar tabs={TABS} activeTab={activeTab} onTabChange={(id) => setActiveTab(id as TabId)} />

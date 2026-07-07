@@ -11,14 +11,14 @@ const SCANNER_BARS = [2, 3, 1.5, 3, 2];
 
 export const BarcodeScanner = () => {
     const [scanValue, setScanValue] = useState("");
-    const increment = usePackingStore((s) => s.increment);
+    const registerScan = usePackingStore((s) => s.registerScan);
     const tierService = frontContainer.getTierService();
 
     const handleScan = (code: string) => {
         tierService
             .byBarcode(code)
             .then((tier) => {
-                increment(tier.id);
+                registerScan(tier.id);
                 toast.success(`${tier.name} adicionado`);
             })
             .catch(() => {
@@ -40,7 +40,7 @@ export const BarcodeScanner = () => {
             <div className="flex items-center gap-3 scan-box py-1.75 pr-1.75 pl-4">
                 <span className="flex h-5 flex-none items-center gap-0.5">
                     {SCANNER_BARS.map((width, index) => (
-                        <i key={index} className="block bg-primary" style={{ width, height: 18 }} />
+                        <i key={index} className="block h-4.5 bg-primary" style={{ width: `${width / 16}rem` }} />
                     ))}
                 </span>
                 <input
@@ -53,7 +53,7 @@ export const BarcodeScanner = () => {
                         }
                     }}
                     placeholder="Bipe o leitor ou digite o código…"
-                    className="flex-1 border-none bg-transparent py-2.75 text-[0.9375rem] text-ink outline-none"
+                    className="flex-1 border-none bg-transparent py-2.75 text-sm text-ink outline-none"
                 />
                 <Button onClick={handleInputScan} className="px-4.5 py-2.75 text-sm">
                     Bipar

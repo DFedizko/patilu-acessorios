@@ -2,7 +2,8 @@
 
 import type { ReactNode } from "react";
 
-export type ButtonVariant = "primary" | "ghost" | "dangerOutline" | "ghostDanger" | "counterPlus" | "counterMinus";
+export type ButtonVariant =
+    "primary" | "ghost" | "quiet" | "dangerOutline" | "ghostDanger" | "counterPlus" | "counterMinus";
 
 interface ButtonProps {
     children: ReactNode;
@@ -12,19 +13,24 @@ interface ButtonProps {
     className?: string;
     disabled?: boolean;
     ariaLabel?: string;
+    ariaExpanded?: boolean;
 }
 
 const BASE =
-    "inline-flex cursor-pointer items-center justify-center border border-transparent transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex cursor-pointer items-center justify-center gap-2 border border-transparent font-medium transition-[color,background-color,border-color,box-shadow,transform] duration-150 ease-out focus-ring disabled:pointer-events-none disabled:opacity-50";
+
+const PRESS = "active:scale-[0.98]";
 
 const VARIANTS: Record<ButtonVariant, string> = {
-    primary: "rounded-full bg-primary font-bold text-white shadow-[0_0.5rem_1.125rem_rgba(123,63,228,0.28)]",
-    ghost: "rounded-full bg-ghost font-semibold text-primary-strong",
-    dangerOutline: "rounded-[0.875rem] border-danger-line bg-transparent font-semibold text-danger",
-    ghostDanger: "bg-transparent text-danger",
+    primary: `rounded-md bg-primary font-semibold text-white hover:bg-primary-hover ${PRESS}`,
+    ghost: `rounded-md bg-primary-soft font-semibold text-primary hover:bg-primary/15 ${PRESS}`,
+    quiet: `rounded-md bg-transparent text-ink-muted hover:bg-hover hover:text-ink ${PRESS}`,
+    dangerOutline: `rounded-md border-negative/30 bg-transparent font-semibold text-negative hover:bg-negative-soft ${PRESS}`,
+    ghostDanger: `rounded-md bg-transparent text-negative hover:bg-negative-soft ${PRESS}`,
     counterPlus:
-        "h-11.5 w-11.5 rounded-[0.875rem] bg-primary text-2xl leading-none font-bold text-white shadow-[0_0.375rem_0.875rem_rgba(123,63,228,0.3)]",
-    counterMinus: "h-11.5 w-11.5 rounded-[0.875rem] bg-ghost text-2xl leading-none font-bold text-primary",
+        "h-11.5 w-11.5 rounded-lg bg-primary text-2xl leading-none font-semibold text-white hover:bg-primary-hover",
+    counterMinus:
+        "h-11.5 w-11.5 rounded-lg bg-primary-soft text-2xl leading-none font-semibold text-primary hover:bg-primary/15",
 };
 
 export const Button = ({
@@ -35,12 +41,14 @@ export const Button = ({
     className = "",
     disabled = false,
     ariaLabel,
+    ariaExpanded,
 }: ButtonProps) => (
     <button
         type={type}
         onClick={onClick}
         disabled={disabled}
         aria-label={ariaLabel}
+        aria-expanded={ariaExpanded}
         className={`${BASE} ${VARIANTS[variant]} ${className}`}
     >
         {children}

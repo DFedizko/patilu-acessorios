@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { frontContainer } from "@/di/container";
 import type { Period } from "@/utils/types";
 
@@ -18,6 +18,7 @@ export const useDashboard = (params: DashboardQueryParams) => {
     return useQuery({
         queryKey: dashboardQueryKey(params.period, params.from, params.to),
         queryFn: () => service.getDashboard(params),
+        placeholderData: keepPreviousData,
         enabled: params.period !== "custom" || (!!params.from && !!params.to),
     });
 };

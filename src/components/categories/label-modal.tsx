@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useLabelStore } from "@/stores/use-label-store";
 import { formatCurrency } from "@/utils/format";
 import { Modal } from "@/components/ui/modal/Modal";
@@ -23,7 +24,14 @@ export const LabelModal = () => {
                         {tier.name} · {formatCurrency(tier.costCents / 100)}
                     </ModalHeader>
                     <div className="flex items-center justify-center p-6">
-                        <img src={`/api/tiers/${tier.id}/label`} alt={`Etiqueta ${tier.name}`} className="max-w-full" />
+                        <Image
+                            src={`/api/tiers/${tier.id}/label`}
+                            alt={`Etiqueta ${tier.name}`}
+                            width={400}
+                            height={80}
+                            unoptimized
+                            style={{ width: "100%", height: "auto" }}
+                        />
                     </div>
                     <ModalFooter>
                         <Button variant="ghost" onClick={close} className="px-5 py-3 text-sm">

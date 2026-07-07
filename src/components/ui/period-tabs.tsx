@@ -19,9 +19,12 @@ export const PeriodTabs = ({ value, onChange }: PeriodTabsProps) => (
         {ITEMS.map(([key, label]) => (
             <button
                 key={key}
+                suppressHydrationWarning
                 onClick={() => onChange(key)}
-                className={`cursor-pointer rounded-full border px-3.75 py-2 text-[0.8125rem] font-semibold ${
-                    value === key ? "border-primary bg-primary text-white" : "border-field-line bg-field text-muted"
+                className={`cursor-pointer rounded-full border px-3.75 py-2 text-sm font-medium focus-ring transition-colors duration-150 ${
+                    value === key
+                        ? "border-primary bg-primary text-white"
+                        : "border-border bg-surface text-ink-muted hover:bg-hover hover:text-ink"
                 }`}
             >
                 {label}
