@@ -54,8 +54,7 @@ export const CategoryHeader = ({ category }: CategoryHeaderProps) => {
                     </Button>
                     <Button
                         variant="dangerOutline"
-                        onClick={() => deleteCategory.removeWithUndo({ id: categoryId, name: category.name })}
-                        disabled={deleteCategory.isPending}
+                        onClick={() => deleteCategory.remove({ id: categoryId, name: category.name })}
                         className="px-3.5 py-2 text-xs"
                     >
                         Excluir

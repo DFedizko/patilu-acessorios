@@ -7,7 +7,7 @@ const TOAST_CLASS =
 
 export const Toaster = () => (
     <SonnerToaster
-        position="bottom-center"
+        position="bottom-right"
         toastOptions={{
             unstyled: true,
             classNames: {

@@ -120,6 +120,16 @@ Each layer only knows the **interface** of the layer below it:
 - `queryKey` is the source of truth for cache tags — keep them consistent between query (usage) and mutation (invalidation).
 - **Forms always use React Hook Form + Zod** (via `@hookform/resolvers/zod`): the Zod schema validates the form; reuse the schemas from `src/lib/schemas.ts` when the form payload matches the API's.
 
+## Optimistic UI
+
+Write mutations (create, rename, edit, delete) are **optimistic**: the cache is updated **before** the backend responds, so the UI reflects the change instantly. The pattern, built on TanStack Query mutation lifecycle:
+
+- **Apply before the request (`onMutate`):** cancel in-flight reads for the affected cache tags, take a **snapshot** of the current cache, apply the change optimistically, and return the snapshot as mutation context. Because a resource can live in more than one cached query (e.g. an unfiltered list and a filtered/searched view), the optimistic write, snapshot, and rollback must cover **every** query under the relevant tag prefix, not just one key.
+- **On error:** **revert** to the snapshot. The error toast is already emitted centrally by the `QueryClient`'s global `onError` (see Error handling) — mutation hooks must **not** toast the error again (no double toast); they only roll back.
+- **On success:** show a **success toast** and otherwise **do nothing to the state** — the optimistic value already reflects reality, so **do not refetch/invalidate** (avoids a flicker). The one exception is reconciling **server-generated fields** the client could not know optimistically (ids, generated codes, timestamps): surgically replace the optimistic placeholder with the server response in place, which is visually seamless.
+- **Deferred/undoable actions** (an action offered with an "undo" window) must fire the real request from a **stable owner** — the shared `QueryClient` and the service singleton — **never** from the component-scoped `useMutation`, because the row that triggered the action often unmounts on the optimistic change and would tear down its mutation observer before the deferred request runs.
+- Keep optimistic ordering consistent with the backend's ordering so the optimistic position matches what a refetch would return.
+
 ## Back-end architecture
 
 **Object-oriented** paradigm (classes), following **SOLID** and **always inverting dependencies through interfaces**. The implementation lives in `src/server/`. Routes (`src/app/api/`) are only the HTTP edge: they receive the request, delegate to a **use case**, and return the response.

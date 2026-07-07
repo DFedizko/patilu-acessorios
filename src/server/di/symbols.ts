@@ -22,6 +22,8 @@ export const SYMBOLS = {
     TikTokAdsGateway: Symbol.for("TikTokAdsGateway"),
     TikTokOrderTranslator: Symbol.for("TikTokOrderTranslator"),
     TikTokAdsTranslator: Symbol.for("TikTokAdsTranslator"),
+    TikTokWebhookVerifier: Symbol.for("TikTokWebhookVerifier"),
+    TikTokSyncJob: Symbol.for("TikTokSyncJob"),
     IngestTikTokOrderUseCase: Symbol.for("IngestTikTokOrderUseCase"),
     ListOrdersUseCase: Symbol.for("ListOrdersUseCase"),
     PackingRepository: Symbol.for("PackingRepository"),

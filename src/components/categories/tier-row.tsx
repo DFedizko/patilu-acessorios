@@ -83,7 +83,7 @@ export const TierRow = ({ tier }: TierRowProps) => {
             </Button>
             <Button
                 variant="ghostDanger"
-                onClick={() => deleteTier.removeWithUndo({ id: tier.id, name: tier.name })}
+                onClick={() => deleteTier.remove({ id: tier.id, name: tier.name })}
                 className="p-2"
                 ariaLabel={`Excluir faixa ${tier.name}`}
             >

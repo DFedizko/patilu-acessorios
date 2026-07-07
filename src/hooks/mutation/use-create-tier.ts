@@ -1,8 +1,9 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { frontContainer } from "@/di/container";
-import { CATALOG_KEY } from "@/hooks/query/use-catalog";
+import { cancelCatalog, restoreCatalog, snapshotCatalog, updateCatalog } from "@/lib/catalog-cache";
 import type { ApiCategory, ApiTier } from "@/service/category-service";
 
 type CreateTierInput = {
@@ -11,18 +12,28 @@ type CreateTierInput = {
     costReais: number;
 };
 
-const appendOptimisticTier = (categories: ApiCategory[] | undefined, input: CreateTierInput): ApiCategory[] => {
+const appendOptimisticTier = (
+    categories: ApiCategory[],
+    input: CreateTierInput,
+    optimisticId: string,
+): ApiCategory[] => {
     const optimistic: ApiTier = {
-        id: `optimistic-${Date.now()}`,
+        id: optimisticId,
         name: input.name,
         costCents: Math.round(input.costReais * 100),
         barcode: "…",
         categoryId: input.categoryId,
     };
-    return (categories ?? []).map((category) =>
+    return categories.map((category) =>
         category.id === input.categoryId ? { ...category, tiers: [...category.tiers, optimistic] } : category,
     );
 };
+
+const replaceOptimisticTier = (categories: ApiCategory[], optimisticId: string, created: ApiTier): ApiCategory[] =>
+    categories.map((category) => ({
+        ...category,
+        tiers: category.tiers.map((tier) => (tier.id === optimisticId ? created : tier)),
+    }));
 
 export const useCreateTier = () => {
     const queryClient = useQueryClient();
@@ -33,16 +44,20 @@ export const useCreateTier = () => {
                 ? service.createInCategory({ categoryId, name, costReais })
                 : service.createUncategorized({ name, costReais }),
         onMutate: async (input) => {
-            await queryClient.cancelQueries({ queryKey: CATALOG_KEY });
-            const previous = queryClient.getQueryData<ApiCategory[]>(CATALOG_KEY);
-            queryClient.setQueryData<ApiCategory[]>(CATALOG_KEY, (categories) =>
-                appendOptimisticTier(categories, input),
+            await cancelCatalog(queryClient);
+            const previous = snapshotCatalog(queryClient);
+            const optimisticId = `optimistic-${Date.now()}`;
+            updateCatalog(queryClient, (categories) => appendOptimisticTier(categories, input, optimisticId));
+            return { previous, optimisticId };
+        },
+        onSuccess: (created, _input, context) => {
+            updateCatalog(queryClient, (categories) =>
+                replaceOptimisticTier(categories, context.optimisticId, created),
             );
-            return { previous };
+            toast.success("Faixa criada");
         },
         onError: (_error, _input, context) => {
-            if (context) queryClient.setQueryData(CATALOG_KEY, context.previous);
+            if (context) restoreCatalog(queryClient, context.previous);
         },
-        onSettled: () => queryClient.invalidateQueries({ queryKey: CATALOG_KEY }),
     });
 };

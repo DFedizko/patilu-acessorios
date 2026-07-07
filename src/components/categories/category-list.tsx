@@ -13,7 +13,8 @@ export const CategoryList = () => {
     const { data: categories, isLoading } = useCatalog(search);
     if (isLoading) return <CategoryListSkeleton />;
     if (!categories) return null;
-    if (categories.length === 0) {
+    const visible = categories.filter((category) => category.id !== null);
+    if (visible.length === 0) {
         if (search.trim()) {
             return (
                 <EmptyState
@@ -33,8 +34,8 @@ export const CategoryList = () => {
     }
     return (
         <>
-            {categories.map((category) => (
-                <CategoryCard key={category.id ?? "sem-categoria"} category={category} />
+            {visible.map((category) => (
+                <CategoryCard key={category.id} category={category} />
             ))}
         </>
     );

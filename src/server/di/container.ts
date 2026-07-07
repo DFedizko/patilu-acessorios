@@ -55,6 +55,10 @@ import { SavePackingUseCase } from "@/server/application/use-case/SavePackingUse
 import { DeletePackingUseCase } from "@/server/application/use-case/DeletePackingUseCase";
 import { FakeTikTokOrdersGateway } from "../../../test/fakes/FakeTikTokOrdersGateway";
 import { FakeTikTokAdsGateway } from "../../../test/fakes/FakeTikTokAdsGateway";
+import { TikTokOrdersHttpGateway } from "@/server/infrastructure/gateway/TikTokOrdersHttpGateway";
+import { TikTokAdsHttpGateway } from "@/server/infrastructure/gateway/TikTokAdsHttpGateway";
+import { TikTokWebhookVerifier } from "@/server/infrastructure/gateway/TikTokWebhookVerifier";
+import { TikTokSyncJob } from "@/server/infrastructure/job/TikTokSyncJob";
 import type { IAdSpendPersistenceGateway } from "@/server/application/gateway/IAdSpendPersistenceGateway";
 import type { IGetAdSpendUseCase } from "@/server/application/use-case/contracts/IGetAdSpendUseCase";
 import type { ISetManualAdSpendUseCase } from "@/server/application/use-case/contracts/ISetManualAdSpendUseCase";
@@ -106,10 +110,35 @@ container.bind<IFindTierByBarcodeUseCase>(SYMBOLS.FindTierByBarcodeUseCase).to(F
 
 container.bind<IOrderRepository>(SYMBOLS.OrderRepository).to(OrderPrismaRepository);
 container.bind<IOrderListPersistenceGateway>(SYMBOLS.OrderListPersistenceGateway).to(OrderListPrismaPersistenceGateway);
-container.bind<ITikTokOrdersGateway>(SYMBOLS.TikTokOrdersGateway).toConstantValue(new FakeTikTokOrdersGateway());
-container.bind<ITikTokAdsGateway>(SYMBOLS.TikTokAdsGateway).toConstantValue(new FakeTikTokAdsGateway());
+const isTikTokOrdersConfigured = Boolean(
+    process.env.TIKTOK_SHOP_APP_KEY && process.env.TIKTOK_SHOP_APP_SECRET && process.env.TIKTOK_SHOP_CIPHER,
+);
+const isTikTokAdsConfigured = Boolean(process.env.TIKTOK_ADS_ACCESS_TOKEN && process.env.TIKTOK_ADS_ADVERTISER_ID);
 container.bind<TikTokOrderTranslator>(SYMBOLS.TikTokOrderTranslator).toConstantValue(new TikTokOrderTranslator());
 container.bind<TikTokAdsTranslator>(SYMBOLS.TikTokAdsTranslator).toConstantValue(new TikTokAdsTranslator());
+container.bind<TikTokWebhookVerifier>(SYMBOLS.TikTokWebhookVerifier).toConstantValue(new TikTokWebhookVerifier());
+container.bind<TikTokOrdersHttpGateway>(TikTokOrdersHttpGateway).toSelf();
+container.bind<TikTokAdsHttpGateway>(TikTokAdsHttpGateway).toSelf();
+container
+    .bind<ITikTokOrdersGateway>(SYMBOLS.TikTokOrdersGateway)
+    .toDynamicValue((context) =>
+        isTikTokOrdersConfigured ? context.get(TikTokOrdersHttpGateway) : new FakeTikTokOrdersGateway(),
+    );
+container
+    .bind<ITikTokAdsGateway>(SYMBOLS.TikTokAdsGateway)
+    .toDynamicValue((context) =>
+        isTikTokAdsConfigured ? context.get(TikTokAdsHttpGateway) : new FakeTikTokAdsGateway(),
+    );
+container
+    .bind<TikTokSyncJob>(SYMBOLS.TikTokSyncJob)
+    .toDynamicValue(
+        (context) =>
+            new TikTokSyncJob(
+                context.get<ITikTokOrdersGateway>(SYMBOLS.TikTokOrdersGateway),
+                context.get<IIngestTikTokOrderUseCase>(SYMBOLS.IngestTikTokOrderUseCase),
+                context.get<IGetAdSpendUseCase>(SYMBOLS.GetAdSpendUseCase),
+            ),
+    );
 container.bind<IIngestTikTokOrderUseCase>(SYMBOLS.IngestTikTokOrderUseCase).to(IngestTikTokOrderUseCase);
 container.bind<IListOrdersUseCase>(SYMBOLS.ListOrdersUseCase).to(ListOrdersUseCase);
 

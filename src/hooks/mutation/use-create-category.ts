@@ -1,8 +1,9 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { frontContainer } from "@/di/container";
-import { CATALOG_KEY } from "@/hooks/query/use-catalog";
+import { cancelCatalog, restoreCatalog, snapshotCatalog, updateCatalog } from "@/lib/catalog-cache";
 import type { ApiCategory } from "@/service/category-service";
 
 export const useCreateCategory = () => {
@@ -11,15 +12,25 @@ export const useCreateCategory = () => {
     return useMutation({
         mutationFn: (name: string) => service.create({ name }),
         onMutate: async (name) => {
-            await queryClient.cancelQueries({ queryKey: CATALOG_KEY });
-            const previous = queryClient.getQueryData<ApiCategory[]>(CATALOG_KEY);
-            const optimistic: ApiCategory = { id: `optimistic-${Date.now()}`, name, tiers: [] };
-            queryClient.setQueryData<ApiCategory[]>(CATALOG_KEY, (categories) => [...(categories ?? []), optimistic]);
-            return { previous };
+            await cancelCatalog(queryClient);
+            const previous = snapshotCatalog(queryClient);
+            const optimisticId = `optimistic-${Date.now()}`;
+            const optimistic: ApiCategory = { id: optimisticId, name, tiers: [] };
+            updateCatalog(queryClient, (categories) => [...categories, optimistic]);
+            return { previous, optimisticId };
+        },
+        onSuccess: (created, _name, context) => {
+            updateCatalog(queryClient, (categories) =>
+                categories.map((category) =>
+                    category.id === context.optimisticId
+                        ? { id: created.id, name: created.name, tiers: category.tiers }
+                        : category,
+                ),
+            );
+            toast.success(`Categoria "${_name}" criada`);
         },
         onError: (_error, _name, context) => {
-            if (context) queryClient.setQueryData(CATALOG_KEY, context.previous);
+            if (context) restoreCatalog(queryClient, context.previous);
         },
-        onSettled: () => queryClient.invalidateQueries({ queryKey: CATALOG_KEY }),
     });
 };

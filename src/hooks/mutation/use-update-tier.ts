@@ -1,8 +1,9 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { frontContainer } from "@/di/container";
-import { CATALOG_KEY } from "@/hooks/query/use-catalog";
+import { cancelCatalog, restoreCatalog, snapshotCatalog, updateCatalog } from "@/lib/catalog-cache";
 import type { ApiCategory } from "@/service/category-service";
 
 type UpdateTierInput = {
@@ -11,8 +12,8 @@ type UpdateTierInput = {
     costReais?: number;
 };
 
-const applyTierUpdate = (categories: ApiCategory[] | undefined, input: UpdateTierInput): ApiCategory[] =>
-    (categories ?? []).map((category) => ({
+const applyTierUpdate = (categories: ApiCategory[], input: UpdateTierInput): ApiCategory[] =>
+    categories.map((category) => ({
         ...category,
         tiers: category.tiers.map((tier) =>
             tier.id === input.id
@@ -31,14 +32,16 @@ export const useUpdateTier = () => {
     return useMutation({
         mutationFn: (input: UpdateTierInput) => service.update(input),
         onMutate: async (input) => {
-            await queryClient.cancelQueries({ queryKey: CATALOG_KEY });
-            const previous = queryClient.getQueryData<ApiCategory[]>(CATALOG_KEY);
-            queryClient.setQueryData<ApiCategory[]>(CATALOG_KEY, (categories) => applyTierUpdate(categories, input));
+            await cancelCatalog(queryClient);
+            const previous = snapshotCatalog(queryClient);
+            updateCatalog(queryClient, (categories) => applyTierUpdate(categories, input));
             return { previous };
         },
-        onError: (_error, _input, context) => {
-            if (context) queryClient.setQueryData(CATALOG_KEY, context.previous);
+        onSuccess: () => {
+            toast.success("Faixa atualizada");
         },
-        onSettled: () => queryClient.invalidateQueries({ queryKey: CATALOG_KEY }),
+        onError: (_error, _input, context) => {
+            if (context) restoreCatalog(queryClient, context.previous);
+        },
     });
 };
