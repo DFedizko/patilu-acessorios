@@ -18,10 +18,8 @@ export const CategoryHeader = ({ category }: CategoryHeaderProps) => {
     const categoryId = category.id;
     const save = () => {
         if (!categoryId) return;
-        renameCategory.mutate(
-            { id: categoryId, name: name.trim() || category.name },
-            { onSuccess: () => setEditing(false) },
-        );
+        setEditing(false);
+        renameCategory.mutate({ id: categoryId, name: name.trim() || category.name });
     };
     if (editing) {
         return (
@@ -31,7 +29,7 @@ export const CategoryHeader = ({ category }: CategoryHeaderProps) => {
                     onChange={(event) => setName(event.target.value)}
                     className="flex-1 input-base px-3 py-2.25 text-base font-bold"
                 />
-                <Button onClick={save} disabled={renameCategory.isPending} className="px-4 py-2.25 text-xs">
+                <Button onClick={save} className="px-4 py-2.25 text-xs">
                     Salvar
                 </Button>
             </div>

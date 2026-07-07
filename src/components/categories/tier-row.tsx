@@ -24,14 +24,12 @@ export const TierRow = ({ tier }: TierRowProps) => {
     const [cost, setCost] = useState(toCostInput(tier.costCents));
     const save = () => {
         const costReais = parseNumber(cost);
-        updateTier.mutate(
-            {
-                id: tier.id,
-                name: name.trim() || tier.name,
-                costReais: costReais > 0 ? costReais : tier.costCents / 100,
-            },
-            { onSuccess: () => setEditing(false) },
-        );
+        setEditing(false);
+        updateTier.mutate({
+            id: tier.id,
+            name: name.trim() || tier.name,
+            costReais: costReais > 0 ? costReais : tier.costCents / 100,
+        });
     };
     if (editing) {
         return (
@@ -50,7 +48,7 @@ export const TierRow = ({ tier }: TierRowProps) => {
                         className="w-full border-none bg-transparent px-1.25 py-2.25 text-sm text-ink outline-none"
                     />
                 </div>
-                <Button onClick={save} disabled={updateTier.isPending} className="px-3.5 py-2.25 text-xs">
+                <Button onClick={save} className="px-3.5 py-2.25 text-xs">
                     Salvar
                 </Button>
             </div>
