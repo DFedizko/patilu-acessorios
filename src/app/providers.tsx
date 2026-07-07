@@ -4,8 +4,6 @@ import { isServer, MutationCache, QueryCache, QueryClient, QueryClientProvider }
 import { toast } from "sonner";
 import { resolveMessage } from "@/lib/error-messages";
 
-const STALE_TIME_MS = 60 * 1000;
-
 const makeQueryClient = () =>
     new QueryClient({
         queryCache: new QueryCache({
@@ -20,7 +18,10 @@ const makeQueryClient = () =>
         }),
         defaultOptions: {
             queries: {
-                staleTime: STALE_TIME_MS,
+                staleTime: Infinity,
+                gcTime: Infinity,
+                refetchOnWindowFocus: "always",
+                refetchOnReconnect: "always",
             },
         },
     });

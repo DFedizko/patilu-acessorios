@@ -13,6 +13,8 @@ export const useSavePacking = (orderId: string) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: orderPackingKey(orderId) });
             queryClient.invalidateQueries({ queryKey: ["orders"] });
+            queryClient.invalidateQueries({ queryKey: ["history"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
         },
     });
 };

@@ -13,6 +13,8 @@ export const useSetFixedCost = () => {
         mutationFn: (input: SetFixedCostDTO) => service.setFixedCost(input),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: FIXED_COST_KEY });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["history"] });
         },
     });
 };
