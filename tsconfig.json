@@ -17,22 +17,15 @@
         "incremental": true,
         "plugins": [
             {
-                "name": "next"
-            }
+                "name": "next",
+            },
         ],
         "paths": {
             "@/*": ["./src/*"],
-            "@themes/*": ["./themes/*"]
+            "@themes/*": ["./themes/*"],
         },
-        "types": ["bun, node"]
+        "types": ["bun", "node"],
     },
-    "include": [
-        "next-env.d.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        ".next/types/**/*.ts",
-        ".next/dev/types/**/*.ts",
-        "**/*.mts"
-    ],
-    "exclude": ["node_modules", "Patilu Acessórios design 2"]
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts", "**/*.mts"],
+    "exclude": ["node_modules", "Patilu Acessórios design 2"],
 }
