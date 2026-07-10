@@ -1,4 +1,5 @@
 import { CategoryNameRequiredError } from "@/server/domain/error/CategoryNameRequiredError";
+import { Entity } from "./Entity";
 
 type RestoreProps = {
     id: string;
@@ -7,41 +8,43 @@ type RestoreProps = {
     updatedAt: Date;
 };
 
-export class Category {
+type CategoryProps = {
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+export class Category extends Entity<CategoryProps> {
     private constructor(
-        private readonly id: string,
-        private name: string,
-        private readonly createdAt: Date,
-        private readonly updatedAt: Date,
-    ) {}
+        protected readonly props: CategoryProps,
+        id?: string,
+    ) {
+        super(props, id);
+    }
 
     static create(name: string): Category {
         if (!name || name.trim().length === 0) {
             throw new CategoryNameRequiredError();
         }
-        return new Category(crypto.randomUUID(), name.trim(), new Date(), new Date());
+        return new Category({ name: name.trim(), createdAt: new Date(), updatedAt: new Date() });
     }
 
     static restore(props: RestoreProps): Category {
-        return new Category(props.id, props.name, props.createdAt, props.updatedAt);
+        return new Category({ name: props.name, createdAt: props.createdAt, updatedAt: props.updatedAt }, props.id);
     }
 
     rename(name: string): void {
         if (!name || name.trim().length === 0) {
             throw new CategoryNameRequiredError();
         }
-        this.name = name.trim();
-    }
-
-    getId(): string {
-        return this.id;
+        this.props.name = name.trim();
     }
 
     getName(): string {
-        return this.name;
+        return this.props.name;
     }
 
     getCreatedAt(): Date {
-        return this.createdAt;
+        return this.props.createdAt;
     }
 }

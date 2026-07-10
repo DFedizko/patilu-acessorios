@@ -1,72 +1,44 @@
 "use client";
 
-import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Field } from "@/components/ui/field";
-import { MoneyInput } from "@/components/ui/money-input";
-import { Button } from "@/components/ui/button";
-import { useFixedCost } from "@/hooks/query/use-fixed-cost";
-import { useSetFixedCost } from "@/hooks/mutation/use-set-fixed-cost";
-import { parseNumber } from "@/utils/format";
-
-const schema = z.object({
-    amount: z
-        .string()
-        .min(1, "Informe o valor")
-        .refine((val) => parseNumber(val) >= 0, "Custo fixo não pode ser negativo"),
-});
-
-type FormValues = z.infer<typeof schema>;
-
-const centsToDisplay = (cents: number): string => (cents / 100).toFixed(2).replace(".", ",");
+import { toast } from "sonner";
+import type { FixedCostEntryDTO } from "@/lib/schemas";
+import { useFixedCosts } from "@/hooks/query/use-fixed-costs";
+import { useAddFixedCost } from "@/hooks/mutation/use-add-fixed-cost";
+import { useRemoveFixedCost } from "@/hooks/mutation/use-remove-fixed-cost";
+import { FixedCostRow } from "@/components/settings/fixed-cost-row";
+import { AddFixedCostForm } from "@/components/settings/add-fixed-cost-form";
 
 export const FixedCostTab = () => {
-    const { data } = useFixedCost();
-    const mutation = useSetFixedCost();
-
-    const form = useForm<FormValues>({
-        resolver: zodResolver(schema),
-        defaultValues: { amount: "" },
-    });
-
-    useEffect(() => {
-        if (data) {
-            form.reset({ amount: centsToDisplay(data.fixedCostPerOrderCents) });
-        }
-    }, [data, form]);
-
-    const onSubmit = (values: FormValues) => {
-        mutation.mutate({ amountReais: parseNumber(values.amount) });
+    const { data } = useFixedCosts();
+    const addFixedCost = useAddFixedCost();
+    const removeFixedCost = useRemoveFixedCost();
+    const disabled = addFixedCost.isPending || removeFixedCost.isPending;
+    const handleSave = (entry: FixedCostEntryDTO) => {
+        addFixedCost.mutate(entry, { onSuccess: () => toast.success("Custo fixo atualizado") });
     };
-
+    const handleRemove = (name: string) => {
+        removeFixedCost.mutate(name, { onSuccess: () => toast.success("Custo fixo removido") });
+    };
+    const costs = data?.costs ?? [];
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5">
             <p className="text-sm/relaxed text-ink-muted">
-                O custo fixo por pedido é descontado do lucro bruto em cada venda. Alterar este valor passa a valer
-                imediatamente para os cálculos de Histórico e Dashboard.
+                Custos fixos são descontados do lucro em cada venda. Um custo <strong>por pedido</strong> entra uma vez
+                por pedido (ex.: caixa); um custo <strong>por produto</strong> é multiplicado pela quantidade de itens
+                empacotados (ex.: etiqueta). Alterações valem imediatamente para Histórico e Dashboard.
             </p>
-            <Field label="Custo fixo por pedido">
-                <Controller
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                        <MoneyInput value={field.value} onChange={field.onChange} placeholder="0,00" />
-                    )}
-                />
-                {form.formState.errors.amount && (
-                    <span className="text-xs text-negative">{form.formState.errors.amount.message}</span>
-                )}
-            </Field>
-            <Button
-                type="submit"
-                variant="primary"
-                disabled={mutation.isPending}
-                className="self-end px-7 py-2.5 text-sm"
-            >
-                {mutation.isPending ? "Salvando..." : "Salvar"}
-            </Button>
-        </form>
+            <div className="flex flex-col gap-3">
+                {costs.map((cost) => (
+                    <FixedCostRow
+                        key={cost.name}
+                        cost={cost}
+                        onSave={handleSave}
+                        onRemove={handleRemove}
+                        disabled={disabled}
+                    />
+                ))}
+            </div>
+            <AddFixedCostForm />
+        </div>
     );
 };

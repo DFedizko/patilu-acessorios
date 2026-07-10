@@ -36,7 +36,7 @@ export class ReportPrismaPersistenceGateway implements IReportPersistenceGateway
             orderedAt: record.orderedAt,
         };
         if (!record.packing) {
-            return { ...base, itemsCost: null, items: [] };
+            return { ...base, itemsCost: null, itemCount: 0, items: [] };
         }
         const items = record.packing.items.map((item) => ({
             categoryName: item.categoryName,
@@ -48,6 +48,8 @@ export class ReportPrismaPersistenceGateway implements IReportPersistenceGateway
             Money.zero(),
         );
         const itemsCost = tierCost.add(looseCost);
-        return { ...base, itemsCost, items };
+        const tierUnitCount = record.packing.items.reduce((acc, item) => acc + item.quantity, 0);
+        const itemCount = tierUnitCount + record.packing.looseItems.length;
+        return { ...base, itemsCost, itemCount, items };
     }
 }

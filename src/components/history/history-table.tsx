@@ -10,7 +10,7 @@ interface HistoryTableProps {
 }
 
 const MAX_ROWS = 30;
-const GRID_COLS = "grid-cols-[0.6fr_0.7fr_1.3fr_0.8fr_0.8fr_0.8fr_0.8fr_1.1fr]";
+const GRID_COLS = "grid-cols-[0.6fr_0.7fr_1.3fr_0.8fr_0.8fr_0.8fr_0.8fr_0.8fr_1.1fr]";
 
 const formatOrderedAt = (orderedAt: string): { date: string; time: string } => {
     const [datePart, timePart] = orderedAt.split("T");
@@ -33,9 +33,10 @@ export const HistoryTable = ({ rows }: HistoryTableProps) => {
                     <span>Data</span>
                     <span>Hora</span>
                     <span>Cliente</span>
+                    <span className="text-right">Custo</span>
+                    <span className="text-right">Custo fixo</span>
                     <span className="text-right">CPA</span>
                     <span className="text-right">Impostos</span>
-                    <span className="text-right">Custo fixo</span>
                     <span className="text-right">Venda</span>
                     <span className="text-right">Margem líquida</span>
                 </DataTableHeader>
@@ -48,13 +49,16 @@ export const HistoryTable = ({ rows }: HistoryTableProps) => {
                             <span className="font-mono text-xs text-ink-muted tabular-nums">{time}</span>
                             <span className="text-sm font-semibold text-ink">{row.recipientName ?? "—"}</span>
                             <span className="text-right font-mono text-sm text-ink-muted tabular-nums">
+                                {row.itemsCostCents != null ? formatCurrency(row.itemsCostCents / 100) : "—"}
+                            </span>
+                            <span className="text-right font-mono text-sm text-ink-muted tabular-nums">
+                                {formatCurrency(row.fixedCostCents / 100)}
+                            </span>
+                            <span className="text-right font-mono text-sm text-ink-muted tabular-nums">
                                 {formatCurrency(row.cpaCents / 100)}
                             </span>
                             <span className="text-right font-mono text-sm text-ink-muted tabular-nums">
                                 {formatCurrency(row.taxCents / 100)}
-                            </span>
-                            <span className="text-right font-mono text-sm text-ink-muted tabular-nums">
-                                {formatCurrency(row.fixedCostCents / 100)}
                             </span>
                             <span className="text-right font-mono text-sm text-ink tabular-nums">
                                 {formatCurrency(row.saleCents / 100)}

@@ -63,7 +63,7 @@ export class PackingPrismaRepository implements IPackingRepository {
                 packing.getLooseItems().map((item) =>
                     tx.looseItem.create({
                         data: {
-                            id: item.getId(),
+                            id: item.id,
                             packingId: record.id,
                             name: item.getName(),
                             costCents: item.getCostCents(),

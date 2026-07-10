@@ -10,12 +10,6 @@ const PENDING_STATUSES = new Set<TikTokOrderStatus>([
 
 const SHIPPED_STATUSES = new Set<TikTokOrderStatus>(["IN_TRANSIT", "DELIVERED", "COMPLETED"]);
 
-const mapToShipmentStatus = (status: TikTokOrderStatus): ShipmentStatus => {
-    if (PENDING_STATUSES.has(status)) return "PENDING";
-    if (SHIPPED_STATUSES.has(status)) return "SHIPPED";
-    return "CANCELLED";
-};
-
 export class TikTokOrderTranslator {
     toDomain(dto: TikTokOrderDTO): Order {
         return Order.restore({
@@ -26,7 +20,7 @@ export class TikTokOrderTranslator {
             saleCents: dto.totalAmountCents,
             shippingCents: dto.shippingFeeCents,
             orderedAt: new Date(dto.createTime),
-            shipmentStatus: mapToShipmentStatus(dto.orderStatus),
+            shipmentStatus: this.mapToShipmentStatus(dto.orderStatus),
             packingStatus: "NOT_PACKED",
         });
     }
@@ -48,4 +42,10 @@ export class TikTokOrderTranslator {
         if (status === "CANCELLED") return "CANCELLED";
         return "AWAITING_SHIPMENT";
     }
+
+    private mapToShipmentStatus = (status: TikTokOrderStatus): ShipmentStatus => {
+        if (PENDING_STATUSES.has(status)) return "PENDING";
+        if (SHIPPED_STATUSES.has(status)) return "SHIPPED";
+        return "CANCELLED";
+    };
 }

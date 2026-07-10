@@ -8,7 +8,7 @@ const TABLES = [
     "tiers",
     "categories",
     "ad_spend_days",
-    "app_config",
+    "fixed_costs",
 ] as const;
 
 export const truncateAll = async (): Promise<void> => {

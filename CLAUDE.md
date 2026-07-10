@@ -322,9 +322,3 @@ Routes wrap the use case in `try/catch` and use a central helper (`src/lib/http-
 - When a component grows with many props (`shouldShowIcon`, `iconLeft`, `buttonLabel`...), apply the composition pattern: break it into smaller pieces, manage their state with a single Zustand store, one file per piece, exporting each in its own file.
 
 > **Framework exception to the export rule:** Next.js requires `export default` in `page.tsx`, `layout.tsx`, `template.tsx`, `error.tsx`, etc., and requires named route handlers (`GET`, `POST`, ...) in `route.ts`. Follow Next's convention in those cases — the "always named, never default" rule applies to the rest of the code.
-
-## Formatting
-
-- Prettier: 4-space indentation, semicolons, trailing comma `all`, `printWidth` 120. `.prettierrc` is the single source of truth — configure your editor to read it (do not override `printWidth` per-editor).
-- `bun run lint` runs `eslint-plugin-prettier`, so formatting violations (including line wrapping past `printWidth`) surface as lint errors — agents detect them via the lint command and fix them with `bun run format`.
-- ESLint enforces a max `complexity` of 10 per function.

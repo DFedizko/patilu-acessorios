@@ -1,10 +1,14 @@
+import { ValueObject } from "./ValueObject";
+
 const SAO_PAULO_TZ = "America/Sao_Paulo";
 
-export class Period {
+export class Period extends ValueObject<{ start: Date; end: Date }> {
     private constructor(
         readonly start: Date,
         readonly end: Date,
-    ) {}
+    ) {
+        super({ start, end });
+    }
 
     static create(start: Date, end: Date): Period {
         const startSp = Period.toSaoPauloMidnight(start);

@@ -23,7 +23,8 @@
         "paths": {
             "@/*": ["./src/*"],
             "@themes/*": ["./themes/*"]
-        }
+        },
+        "types": ["bun, node"]
     },
     "include": [
         "next-env.d.ts",

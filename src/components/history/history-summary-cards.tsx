@@ -43,8 +43,8 @@ export const HistorySummaryCards = ({ summary }: HistorySummaryCardsProps) => {
             icon: <BanknoteIcon />,
         },
         {
-            label: "Custo itens",
-            value: summary.costCents / 100,
+            label: "Custo",
+            value: (summary.costCents + summary.fixedCostTotalCents) / 100,
             format: formatCurrency,
             accentClass: "text-ink",
             icon: <CoinsIcon />,

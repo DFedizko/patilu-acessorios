@@ -20,7 +20,7 @@ import { OrdersTableSkeleton } from "@/components/orders/skeletons/orders-table-
 import { EmptyState } from "@/components/ui/empty-state";
 import { InboxIcon } from "@/components/ui/icons/inbox-icon";
 
-const GRID_COLS = "grid-cols-[1.5fr_1fr_1fr_0.7fr_1fr_1.2fr]";
+const GRID_COLS = "grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr]";
 
 const formatOrderTime = (isoString: string) =>
     new Date(isoString).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -102,36 +102,36 @@ const OrdersTable = ({ orders, isPending, dimmed }: OrdersTableProps) => {
         <div className={`transition-opacity duration-150 ${dimmed ? "opacity-60" : ""}`}>
             <DataTable>
                 <DataTableHeader gridCols={GRID_COLS}>
-                    <span>Cliente</span>
-                    <span className="text-right">Valor</span>
-                    <span className="text-right">Frete</span>
-                    <span>Hora</span>
-                    <span>Status</span>
-                    <span>Ação</span>
+                    <span className="text-center">Cliente</span>
+                    <span className="text-center">Valor</span>
+                    <span className="text-center">Frete</span>
+                    <span className="text-center">Hora</span>
+                    <span className="text-center">Status</span>
+                    <span className="text-center">Ação</span>
                 </DataTableHeader>
                 {orders.map((order) => {
                     const status = resolveStatus(order);
                     const actionLabel = resolveActionLabel(order);
                     return (
                         <DataTableRow key={order.orderId} gridCols={GRID_COLS}>
-                            <span className="text-sm font-semibold text-ink">
+                            <span className="text-center text-sm font-semibold text-ink">
                                 {order.recipientName ?? order.orderNumber}
                             </span>
-                            <span className="text-right font-mono text-sm text-ink tabular-nums">
+                            <span className="text-center font-mono text-sm text-ink tabular-nums">
                                 {formatCurrency(order.saleCents / 100)}
                             </span>
-                            <span className="text-right font-mono text-sm text-ink-muted tabular-nums">
+                            <span className="text-center font-mono text-sm text-ink-muted tabular-nums">
                                 {formatCurrency(order.shippingCents / 100)}
                             </span>
-                            <span className="font-mono text-xs text-ink-muted tabular-nums">
+                            <span className="text-center font-mono text-xs text-ink-muted tabular-nums">
                                 {formatOrderTime(order.orderedAt)}
                             </span>
-                            <span>
+                            <span className="text-center">
                                 <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${status.className}`}>
                                     {status.label}
                                 </span>
                             </span>
-                            <span>
+                            <span className="text-center">
                                 {actionLabel && (
                                     <Link
                                         href={`/pedidos/${order.orderId}/empacotar`}

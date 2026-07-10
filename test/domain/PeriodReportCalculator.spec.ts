@@ -1,16 +1,21 @@
 import { describe, it, expect } from "bun:test";
 import { PeriodReportCalculator, type OrderInPeriod } from "@/server/domain/service/PeriodReportCalculator";
 import { Money } from "@/server/domain/value-object/Money";
+import { FixedCosts } from "@/server/domain/value-object/FixedCosts";
 
 const makeOrder = (overrides: Partial<OrderInPeriod> = {}): OrderInPeriod => ({
     orderId: "order-1",
     sale: Money.fromCents(10000),
     shipping: Money.fromCents(1000),
     itemsCost: Money.fromCents(3000),
+    itemCount: 0,
     items: [],
     orderedAt: new Date("2024-01-01T10:00:00Z"),
     ...overrides,
 });
+
+const boxCost = (cents: number): FixedCosts =>
+    FixedCosts.empty().addFixedCost("Caixa", Money.fromCents(cents), "PER_ORDER");
 
 describe("PeriodReportCalculator", () => {
     const calculator = new PeriodReportCalculator();
@@ -48,10 +53,10 @@ describe("PeriodReportCalculator", () => {
                 itemsCost: Money.fromCents(3000),
             });
             const cpa = Money.fromCents(500);
-            const fixedCost = Money.fromCents(300);
+            const fixedCosts = boxCost(300);
 
             // Act
-            const result = calculator.computeNetMarginPerOrder(order, cpa, fixedCost);
+            const result = calculator.computeNetMarginPerOrder(order, cpa, fixedCosts);
 
             // Assert — tax = 4.2% of 10000 = 420; 10000 - 3000 - 1000 - 500 - 300 - 420 = 4780
             expect(result.value.toCents()).toBe(4780);
@@ -63,7 +68,7 @@ describe("PeriodReportCalculator", () => {
             const order = makeOrder({ sale: Money.fromCents(10000), shipping: Money.fromCents(0), itemsCost: null });
 
             // Act
-            const result = calculator.computeNetMarginPerOrder(order, Money.zero(), Money.zero());
+            const result = calculator.computeNetMarginPerOrder(order, Money.zero(), FixedCosts.empty());
 
             // Assert — tax = 420; 10000 - 420 = 9580
             expect(result.value.toCents()).toBe(9580);
@@ -118,10 +123,10 @@ describe("PeriodReportCalculator", () => {
                 }),
             ];
             const totalAds = Money.fromCents(5000);
-            const fixedCost = Money.fromCents(300);
+            const fixedCosts = boxCost(300);
 
             // Act
-            const result = calculator.computePeriodProfit(orders, totalAds, fixedCost);
+            const result = calculator.computePeriodProfit(orders, totalAds, fixedCosts);
 
             // Assert
             // revenue = 18000, cost = 5000, shipping = 1500, fixedTotal = 600

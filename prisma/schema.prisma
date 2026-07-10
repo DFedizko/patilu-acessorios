@@ -114,10 +114,10 @@ model AdSpendDay {
     @@map("ad_spend_days")
 }
 
-model AppConfig {
-    id                     String   @id @default("singleton")
-    fixedCostPerOrderCents Int      @default(300)
-    updatedAt              DateTime @updatedAt
+model FixedCosts {
+    id        String   @id @default("singleton")
+    costs     Json     @default("[]")
+    updatedAt DateTime @updatedAt
 
-    @@map("app_config")
+    @@map("fixed_costs")
 }

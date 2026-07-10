@@ -42,7 +42,7 @@ export const GET = async (_request: NextRequest, context: RouteContext): Promise
                           quantity: item.getQuantity(),
                       })),
                       looseItems: result.packing.getLooseItems().map((item) => ({
-                          id: item.getId(),
+                          id: item.id,
                           name: item.getName(),
                           costCents: item.getCostCents(),
                       })),
@@ -89,7 +89,7 @@ export const PUT = async (request: NextRequest, context: RouteContext): Promise<
                 quantity: item.getQuantity(),
             })),
             looseItems: packing.getLooseItems().map((item) => ({
-                id: item.getId(),
+                id: item.id,
                 name: item.getName(),
                 costCents: item.getCostCents(),
             })),

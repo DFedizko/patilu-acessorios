@@ -21,11 +21,6 @@ export type LooseItemInput = z.infer<typeof looseItemSchema>;
 export type NewCategoryInput = z.infer<typeof newCategorySchema>;
 export type TierInput = z.infer<typeof tierSchema>;
 
-// Shared period query schema — reused by all read-by-period endpoints (Orders, History, Dashboard, Ads).
-// Convention: every endpoint input schema also exports `export type <Action>DTO = z.input<typeof <action>Schema>`
-// consumed as the `Input` type of the corresponding use case contract (IUseCase<Input, Output>).
-// When the use case needs extra data not in the body (e.g. route params, auth context), the contract Input
-// is `<Action>DTO & { extraField: Type }`.
 export const periodQuerySchema = z
     .object({
         period: z.enum(["today", "week", "month", "custom"]),
@@ -39,11 +34,24 @@ export const periodQuerySchema = z
 
 export type PeriodQueryDTO = z.input<typeof periodQuerySchema>;
 
-export const setFixedCostSchema = z.object({
-    amountReais: z.number().min(0, "Custo fixo não pode ser negativo"),
+export const fixedCostScopeSchema = z.enum(["PER_ORDER", "PER_PRODUCT"]);
+
+export const fixedCostEntrySchema = z.object({
+    name: z.string().min(1, "Informe o nome do custo"),
+    amountCents: z.number().int().min(0, "Custo não pode ser negativo"),
+    scope: fixedCostScopeSchema,
 });
 
-export type SetFixedCostDTO = z.input<typeof setFixedCostSchema>;
+export const addFixedCostSchema = fixedCostEntrySchema;
+
+export const removeFixedCostSchema = z.object({
+    name: z.string().min(1, "Informe o nome do custo"),
+});
+
+export type FixedCostScopeDTO = z.infer<typeof fixedCostScopeSchema>;
+export type FixedCostEntryDTO = z.infer<typeof fixedCostEntrySchema>;
+export type AddFixedCostDTO = z.input<typeof addFixedCostSchema>;
+export type RemoveFixedCostDTO = z.input<typeof removeFixedCostSchema>;
 
 export const listCatalogQuerySchema = z.object({
     search: z.string().optional(),
@@ -148,6 +156,7 @@ export type HistorySummary = {
     orderCount: number;
     revenueCents: number;
     costCents: number;
+    fixedCostTotalCents: number;
     taxCents: number;
     totalAdsCents: number;
     profitCents: number;

@@ -7,10 +7,9 @@ import { OrderPrismaRepository } from "@/server/infrastructure/repository/OrderP
 import { PackingPrismaRepository } from "@/server/infrastructure/repository/PackingPrismaRepository";
 import { TierPrismaRepository } from "@/server/infrastructure/repository/TierPrismaRepository";
 import { CategoryPrismaRepository } from "@/server/infrastructure/repository/CategoryPrismaRepository";
-import { ConfigPrismaPersistenceGateway } from "@/server/infrastructure/gateway/ConfigPrismaPersistenceGateway";
+import { FixedCostsPrismaGateway } from "@/server/infrastructure/gateway/FixedCostsPrismaGateway";
 import { ReportPrismaPersistenceGateway } from "@/server/infrastructure/gateway/ReportPrismaPersistenceGateway";
 import { SavePackingUseCase } from "@/server/application/use-case/SavePackingUseCase";
-import { GetFixedCostUseCase } from "@/server/application/use-case/GetFixedCostUseCase";
 import { GetHistoryUseCase } from "@/server/application/use-case/GetHistoryUseCase";
 import { PeriodReportCalculator } from "@/server/domain/service/PeriodReportCalculator";
 import type { PeriodQueryDTO } from "@/lib/schemas";
@@ -21,8 +20,8 @@ const daysAgo = (days: number): Date => {
     return d;
 };
 
-const makeGetAdSpend = (totalCents: number) => ({
-    execute: async (_input: PeriodQueryDTO) => ({ totalCents, available: false, source: "MANUAL" as const }),
+const makeAdSpendResolver = (totalCents: number) => ({
+    resolve: async (_input: PeriodQueryDTO) => ({ totalCents, available: false, source: "MANUAL" as const }),
 });
 
 describe("GetHistoryUseCase", () => {
@@ -32,15 +31,15 @@ describe("GetHistoryUseCase", () => {
     beforeEach(async () => {
         await truncateAll();
         const reportGateway = new ReportPrismaPersistenceGateway(testPrisma);
-        const configGateway = new ConfigPrismaPersistenceGateway(testPrisma);
-        const getFixedCost = new GetFixedCostUseCase(configGateway);
+        const configGateway = new FixedCostsPrismaGateway(testPrisma);
+        const getFixedCost = configGateway;
         const calculator = new PeriodReportCalculator();
         const orderRepo = new OrderPrismaRepository(testPrisma);
         const packingRepo = new PackingPrismaRepository(testPrisma);
         const tierRepo = new TierPrismaRepository(testPrisma);
         const categoryRepo = new CategoryPrismaRepository(testPrisma);
         savePacking = new SavePackingUseCase(orderRepo, packingRepo, tierRepo, categoryRepo);
-        getHistory = new GetHistoryUseCase(reportGateway, makeGetAdSpend(0), getFixedCost, calculator);
+        getHistory = new GetHistoryUseCase(reportGateway, makeAdSpendResolver(0), getFixedCost, calculator);
     });
 
     it("returns empty rows and zero summary when no orders exist", async () => {
@@ -69,8 +68,8 @@ describe("GetHistoryUseCase", () => {
         });
         const useCase = new GetHistoryUseCase(
             new ReportPrismaPersistenceGateway(testPrisma),
-            makeGetAdSpend(1000),
-            new GetFixedCostUseCase(new ConfigPrismaPersistenceGateway(testPrisma)),
+            makeAdSpendResolver(1000),
+            new FixedCostsPrismaGateway(testPrisma),
             new PeriodReportCalculator(),
         );
 
@@ -93,7 +92,7 @@ describe("GetHistoryUseCase", () => {
             looseItems: [],
         });
 
-        // Act — getHistory uses makeGetAdSpend(0) from beforeEach
+        // Act — getHistory uses makeAdSpendResolver(0) from beforeEach
         const result = await getHistory.execute({ period: "week" });
 
         // Assert
@@ -115,8 +114,8 @@ describe("GetHistoryUseCase", () => {
         });
         const useCase = new GetHistoryUseCase(
             new ReportPrismaPersistenceGateway(testPrisma),
-            makeGetAdSpend(1000),
-            new GetFixedCostUseCase(new ConfigPrismaPersistenceGateway(testPrisma)),
+            makeAdSpendResolver(1000),
+            new FixedCostsPrismaGateway(testPrisma),
             new PeriodReportCalculator(),
         );
 
@@ -195,8 +194,8 @@ describe("GetHistoryUseCase", () => {
         });
         const useCase = new GetHistoryUseCase(
             new ReportPrismaPersistenceGateway(testPrisma),
-            makeGetAdSpend(2000),
-            new GetFixedCostUseCase(new ConfigPrismaPersistenceGateway(testPrisma)),
+            makeAdSpendResolver(2000),
+            new FixedCostsPrismaGateway(testPrisma),
             new PeriodReportCalculator(),
         );
 

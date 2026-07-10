@@ -1,4 +1,7 @@
+import { Entity } from "./Entity";
+
 type CreateProps = {
+    id?: string;
     name: string;
     costCents: number;
 };
@@ -10,35 +13,44 @@ type RestoreProps = {
     costCents: number;
 };
 
-export class LooseItem {
+type LooseItemProps = {
+    packingId: string;
+    name: string;
+    costCents: number;
+};
+
+export class LooseItem extends Entity<LooseItemProps> {
     private constructor(
-        private readonly id: string,
-        private readonly packingId: string,
-        private readonly name: string,
-        private readonly costCents: number,
-    ) {}
+        protected readonly props: LooseItemProps,
+        id?: string,
+    ) {
+        super(props, id);
+    }
 
     static create(props: CreateProps): LooseItem {
-        return new LooseItem(crypto.randomUUID(), "", props.name, props.costCents);
+        return new LooseItem({ packingId: "", name: props.name, costCents: props.costCents }, props.id);
     }
 
     static restore(props: RestoreProps): LooseItem {
-        return new LooseItem(props.id, props.packingId, props.name, props.costCents);
-    }
-
-    getId(): string {
-        return this.id;
+        return new LooseItem(
+            {
+                packingId: props.packingId,
+                name: props.name,
+                costCents: props.costCents,
+            },
+            props.id,
+        );
     }
 
     getPackingId(): string {
-        return this.packingId;
+        return this.props.packingId;
     }
 
     getName(): string {
-        return this.name;
+        return this.props.name;
     }
 
     getCostCents(): number {
-        return this.costCents;
+        return this.props.costCents;
     }
 }

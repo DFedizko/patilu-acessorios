@@ -7,10 +7,9 @@ import { OrderPrismaRepository } from "@/server/infrastructure/repository/OrderP
 import { PackingPrismaRepository } from "@/server/infrastructure/repository/PackingPrismaRepository";
 import { TierPrismaRepository } from "@/server/infrastructure/repository/TierPrismaRepository";
 import { CategoryPrismaRepository } from "@/server/infrastructure/repository/CategoryPrismaRepository";
-import { ConfigPrismaPersistenceGateway } from "@/server/infrastructure/gateway/ConfigPrismaPersistenceGateway";
+import { FixedCostsPrismaGateway } from "@/server/infrastructure/gateway/FixedCostsPrismaGateway";
 import { ReportPrismaPersistenceGateway } from "@/server/infrastructure/gateway/ReportPrismaPersistenceGateway";
 import { SavePackingUseCase } from "@/server/application/use-case/SavePackingUseCase";
-import { GetFixedCostUseCase } from "@/server/application/use-case/GetFixedCostUseCase";
 import { GetDashboardUseCase } from "@/server/application/use-case/GetDashboardUseCase";
 import { PeriodReportCalculator } from "@/server/domain/service/PeriodReportCalculator";
 import type { PeriodQueryDTO } from "@/lib/schemas";
@@ -21,16 +20,16 @@ const daysAgo = (days: number): Date => {
     return d;
 };
 
-const makeGetAdSpend = (totalCents: number, available = false) => ({
-    execute: async (_input: PeriodQueryDTO) => ({ totalCents, available, source: "MANUAL" as const }),
+const makeAdSpendResolver = (totalCents: number, available = false) => ({
+    resolve: async (_input: PeriodQueryDTO) => ({ totalCents, available, source: "MANUAL" as const }),
 });
 
 const makeUseCaseWith = (adsCents: number, available = false) => {
     const reportGateway = new ReportPrismaPersistenceGateway(testPrisma);
-    const configGateway = new ConfigPrismaPersistenceGateway(testPrisma);
-    const getFixedCost = new GetFixedCostUseCase(configGateway);
+    const configGateway = new FixedCostsPrismaGateway(testPrisma);
+    const getFixedCost = configGateway;
     const calculator = new PeriodReportCalculator();
-    return new GetDashboardUseCase(reportGateway, makeGetAdSpend(adsCents, available), getFixedCost, calculator);
+    return new GetDashboardUseCase(reportGateway, makeAdSpendResolver(adsCents, available), getFixedCost, calculator);
 };
 
 describe("GetDashboardUseCase", () => {

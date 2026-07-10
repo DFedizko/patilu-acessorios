@@ -8,18 +8,20 @@ import type { ICategoryRepository } from "@/server/domain/repository/ICategoryRe
 import type { ITierRepository } from "@/server/domain/repository/ITierRepository";
 import { CategoryPrismaRepository } from "@/server/infrastructure/repository/CategoryPrismaRepository";
 import { TierPrismaRepository } from "@/server/infrastructure/repository/TierPrismaRepository";
-import type { IConfigPersistenceGateway } from "@/server/application/gateway/IConfigPersistenceGateway";
+import type { IFixedCostsGateway } from "@/server/application/gateway/IFixedCostsGateway";
 import type { ICatalogReadPersistenceGateway } from "@/server/application/gateway/ICatalogReadPersistenceGateway";
-import type { IGetFixedCostUseCase } from "@/server/application/use-case/contracts/IGetFixedCostUseCase";
-import type { ISetFixedCostUseCase } from "@/server/application/use-case/contracts/ISetFixedCostUseCase";
+import type { IGetFixedCostsUseCase } from "@/server/application/use-case/contracts/IGetFixedCostsUseCase";
+import type { IAddFixedCostUseCase } from "@/server/application/use-case/contracts/IAddFixedCostUseCase";
+import type { IRemoveFixedCostUseCase } from "@/server/application/use-case/contracts/IRemoveFixedCostUseCase";
 import type { ICreateCategoryUseCase } from "@/server/application/use-case/contracts/ICreateCategoryUseCase";
 import type { IRenameCategoryUseCase } from "@/server/application/use-case/contracts/IRenameCategoryUseCase";
 import type { IDeleteCategoryUseCase } from "@/server/application/use-case/contracts/IDeleteCategoryUseCase";
 import type { IListCatalogUseCase } from "@/server/application/use-case/contracts/IListCatalogUseCase";
-import { ConfigPrismaPersistenceGateway } from "@/server/infrastructure/gateway/ConfigPrismaPersistenceGateway";
+import { FixedCostsPrismaGateway } from "@/server/infrastructure/gateway/FixedCostsPrismaGateway";
 import { CatalogReadPrismaPersistenceGateway } from "@/server/infrastructure/gateway/CatalogReadPrismaPersistenceGateway";
-import { GetFixedCostUseCase } from "@/server/application/use-case/GetFixedCostUseCase";
-import { SetFixedCostUseCase } from "@/server/application/use-case/SetFixedCostUseCase";
+import { GetFixedCostsUseCase } from "@/server/application/use-case/GetFixedCostsUseCase";
+import { AddFixedCostUseCase } from "@/server/application/use-case/AddFixedCostUseCase";
+import { RemoveFixedCostUseCase } from "@/server/application/use-case/RemoveFixedCostUseCase";
 import { CreateCategoryUseCase } from "@/server/application/use-case/CreateCategoryUseCase";
 import { RenameCategoryUseCase } from "@/server/application/use-case/RenameCategoryUseCase";
 import { DeleteCategoryUseCase } from "@/server/application/use-case/DeleteCategoryUseCase";
@@ -60,9 +62,11 @@ import { TikTokAdsHttpGateway } from "@/server/infrastructure/gateway/TikTokAdsH
 import { TikTokWebhookVerifier } from "@/server/infrastructure/gateway/TikTokWebhookVerifier";
 import { TikTokSyncJob } from "@/server/infrastructure/job/TikTokSyncJob";
 import type { IAdSpendPersistenceGateway } from "@/server/application/gateway/IAdSpendPersistenceGateway";
+import type { IAdSpendResolver } from "@/server/application/service/contracts/IAdSpendResolver";
 import type { IGetAdSpendUseCase } from "@/server/application/use-case/contracts/IGetAdSpendUseCase";
 import type { ISetManualAdSpendUseCase } from "@/server/application/use-case/contracts/ISetManualAdSpendUseCase";
 import { AdSpendPrismaPersistenceGateway } from "@/server/infrastructure/gateway/AdSpendPrismaPersistenceGateway";
+import { AdSpendResolver } from "@/server/application/service/AdSpendResolver";
 import { PeriodReportCalculator } from "@/server/domain/service/PeriodReportCalculator";
 import { GetAdSpendUseCase } from "@/server/application/use-case/GetAdSpendUseCase";
 import { SetManualAdSpendUseCase } from "@/server/application/use-case/SetManualAdSpendUseCase";
@@ -92,12 +96,13 @@ container.bind<PrismaClient>(SYMBOLS.PrismaClient).toConstantValue(appPrismaClie
 container.bind<HttpClient>(SYMBOLS.HttpClient).to(FetchHttpClient);
 container.bind<ICategoryRepository>(SYMBOLS.CategoryRepository).to(CategoryPrismaRepository);
 container.bind<ITierRepository>(SYMBOLS.TierRepository).to(TierPrismaRepository);
-container.bind<IConfigPersistenceGateway>(SYMBOLS.ConfigPersistenceGateway).to(ConfigPrismaPersistenceGateway);
+container.bind<IFixedCostsGateway>(SYMBOLS.FixedCostsGateway).to(FixedCostsPrismaGateway);
 container
     .bind<ICatalogReadPersistenceGateway>(SYMBOLS.CatalogReadPersistenceGateway)
     .to(CatalogReadPrismaPersistenceGateway);
-container.bind<IGetFixedCostUseCase>(SYMBOLS.GetFixedCostUseCase).to(GetFixedCostUseCase);
-container.bind<ISetFixedCostUseCase>(SYMBOLS.SetFixedCostUseCase).to(SetFixedCostUseCase);
+container.bind<IGetFixedCostsUseCase>(SYMBOLS.GetFixedCostsUseCase).to(GetFixedCostsUseCase);
+container.bind<IAddFixedCostUseCase>(SYMBOLS.AddFixedCostUseCase).to(AddFixedCostUseCase);
+container.bind<IRemoveFixedCostUseCase>(SYMBOLS.RemoveFixedCostUseCase).to(RemoveFixedCostUseCase);
 container.bind<ICreateCategoryUseCase>(SYMBOLS.CreateCategoryUseCase).to(CreateCategoryUseCase);
 container.bind<IRenameCategoryUseCase>(SYMBOLS.RenameCategoryUseCase).to(RenameCategoryUseCase);
 container.bind<IDeleteCategoryUseCase>(SYMBOLS.DeleteCategoryUseCase).to(DeleteCategoryUseCase);
@@ -152,6 +157,7 @@ container.bind<IRenderTierLabelUseCase>(SYMBOLS.RenderTierLabelUseCase).to(Rende
 
 container.bind<PeriodReportCalculator>(SYMBOLS.PeriodReportCalculator).toConstantValue(new PeriodReportCalculator());
 container.bind<IAdSpendPersistenceGateway>(SYMBOLS.AdSpendPersistenceGateway).to(AdSpendPrismaPersistenceGateway);
+container.bind<IAdSpendResolver>(SYMBOLS.AdSpendResolver).to(AdSpendResolver);
 container.bind<IGetAdSpendUseCase>(SYMBOLS.GetAdSpendUseCase).to(GetAdSpendUseCase);
 container.bind<ISetManualAdSpendUseCase>(SYMBOLS.SetManualAdSpendUseCase).to(SetManualAdSpendUseCase);
 

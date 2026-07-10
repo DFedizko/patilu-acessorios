@@ -1,8 +1,12 @@
+import { ValueObject } from "./ValueObject";
+
 const BARCODE_PREFIX = "T";
 const BARCODE_PATTERN = /^T[A-Za-z0-9_-]+$/;
 
-export class Barcode {
-    private constructor(private readonly value: string) {}
+export class Barcode extends ValueObject<{ value: string }> {
+    private constructor(private readonly value: string) {
+        super({ value });
+    }
 
     static fromString(value: string): Barcode {
         if (!BARCODE_PATTERN.test(value)) {

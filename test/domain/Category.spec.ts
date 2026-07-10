@@ -8,7 +8,7 @@ describe("Category", () => {
             const category = Category.create("Canetas");
 
             expect(category.getName()).toBe("Canetas");
-            expect(category.getId()).toBeTruthy();
+            expect(category.id).toBeTruthy();
         });
 
         it("trims the name on creation", () => {
@@ -56,7 +56,7 @@ describe("Category", () => {
 
             const category = Category.restore({ id, name: "Canetas", createdAt, updatedAt });
 
-            expect(category.getId()).toBe(id);
+            expect(category.id).toBe(id);
             expect(category.getName()).toBe("Canetas");
             expect(category.getCreatedAt()).toBe(createdAt);
         });

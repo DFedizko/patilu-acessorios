@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { createDocument } from "zod-openapi";
 import {
-    setFixedCostSchema,
+    addFixedCostSchema,
+    fixedCostEntrySchema,
     createCategorySchema,
     renameCategorySchema,
     createTierSchema,
@@ -10,7 +11,9 @@ import {
     setManualAdSpendSchema,
 } from "@/lib/schemas";
 
-const fixedCostResponseSchema = z.object({ fixedCostPerOrderCents: z.number().int() });
+const fixedCostsResponseSchema = z.object({
+    costs: z.array(fixedCostEntrySchema),
+});
 
 const orderListItemSchema = z.object({
     orderId: z.string(),
@@ -696,30 +699,46 @@ export function getOpenApiDocument() {
                     },
                 },
             },
-            "/api/config/fixed-cost": {
+            "/api/fixed-cost": {
                 get: {
-                    operationId: "getFixedCost",
-                    summary: "Lê o custo fixo por pedido",
+                    operationId: "getFixedCosts",
+                    summary: "Lista os custos fixos configurados",
                     tags: ["Config"],
                     responses: {
                         "200": {
-                            description: "Custo fixo por pedido em centavos",
-                            content: { "application/json": { schema: fixedCostResponseSchema } },
+                            description: "Custos fixos com nome, valor em centavos e escopo",
+                            content: { "application/json": { schema: fixedCostsResponseSchema } },
                         },
                     },
                 },
-                put: {
-                    operationId: "setFixedCost",
-                    summary: "Define o custo fixo por pedido",
+                post: {
+                    operationId: "addFixedCost",
+                    summary: "Adiciona ou atualiza um custo fixo",
                     tags: ["Config"],
                     requestBody: {
                         required: true,
-                        content: { "application/json": { schema: setFixedCostSchema } },
+                        content: { "application/json": { schema: addFixedCostSchema } },
                     },
                     responses: {
                         "200": {
-                            description: "Novo custo fixo por pedido em centavos",
-                            content: { "application/json": { schema: fixedCostResponseSchema } },
+                            description: "Lista atualizada de custos fixos",
+                            content: { "application/json": { schema: fixedCostsResponseSchema } },
+                        },
+                        "400": {
+                            description: "Dados inválidos",
+                            content: { "application/json": { schema: validationErrorSchema } },
+                        },
+                    },
+                },
+                delete: {
+                    operationId: "removeFixedCost",
+                    summary: "Remove um custo fixo pelo nome",
+                    tags: ["Config"],
+                    parameters: [{ name: "name", in: "query", required: true, schema: { type: "string" } }],
+                    responses: {
+                        "200": {
+                            description: "Lista atualizada de custos fixos",
+                            content: { "application/json": { schema: fixedCostsResponseSchema } },
                         },
                         "400": {
                             description: "Dados inválidos",

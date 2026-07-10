@@ -111,7 +111,7 @@ describe("Packing", () => {
         it("removes a loose item by id", () => {
             const packing = makePacking();
             packing.addLooseItem("Fita adesiva", Money.fromReais(2.5));
-            const looseItemId = packing.getLooseItems()[0].getId();
+            const looseItemId = packing.getLooseItems()[0].id;
 
             packing.removeLooseItem(looseItemId);
 

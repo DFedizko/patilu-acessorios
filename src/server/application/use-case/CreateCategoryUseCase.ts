@@ -15,6 +15,6 @@ export class CreateCategoryUseCase implements ICreateCategoryUseCase {
     async execute(input: Input): Promise<Output> {
         const category = Category.create(input.name);
         await this.categoryRepo.save(category);
-        return { id: category.getId(), name: category.getName() };
+        return { id: category.id, name: category.getName() };
     }
 }

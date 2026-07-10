@@ -84,7 +84,7 @@ export class Packing {
     }
 
     removeLooseItem(looseItemId: string): void {
-        const index = this.looseItems.findIndex((i) => i.getId() === looseItemId);
+        const index = this.looseItems.findIndex((i) => i.id === looseItemId);
         if (index !== -1) this.looseItems.splice(index, 1);
     }
 

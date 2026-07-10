@@ -14,8 +14,8 @@ export const StatCard = ({ label, value, accentClass, icon, big = false }: StatC
             <span className="text-sm text-ink-muted">{label}</span>
             {icon ? <span className="text-ink-muted">{icon}</span> : null}
         </div>
-        <div className={`mt-1.5 font-mono text-2xl font-semibold tracking-tight tabular-nums ${accentClass}`}>
+        <span className={`mt-1.5 font-mono text-xl font-semibold tracking-tight tabular-nums ${accentClass}`}>
             {value}
-        </div>
+        </span>
     </div>
 );

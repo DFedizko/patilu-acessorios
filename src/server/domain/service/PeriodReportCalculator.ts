@@ -1,10 +1,12 @@
 import { Money } from "@/server/domain/value-object/Money";
+import type { FixedCosts } from "@/server/domain/value-object/FixedCosts";
 
 export type OrderInPeriod = {
     orderId: string;
     sale: Money;
     shipping: Money;
     itemsCost: Money | null;
+    itemCount: number;
     items: { categoryName: string; cost: Money }[];
     orderedAt: Date;
 };
@@ -22,8 +24,9 @@ export class PeriodReportCalculator {
         return sale.multiplyByQuantity(TAX_RATE);
     }
 
-    computeNetMarginPerOrder(order: OrderInPeriod, cpa: Money, fixedCost: Money): { value: Money; pct: number } {
+    computeNetMarginPerOrder(order: OrderInPeriod, cpa: Money, fixedCosts: FixedCosts): { value: Money; pct: number } {
         const cost = order.itemsCost ?? Money.zero();
+        const fixedCost = fixedCosts.totalForOrder(order.itemCount);
         const tax = this.computeTax(order.sale);
         const value = order.sale
             .subtract(cost)
@@ -37,20 +40,20 @@ export class PeriodReportCalculator {
     computePeriodProfit(
         orders: OrderInPeriod[],
         totalAds: Money,
-        fixedCost: Money,
-    ): { revenue: Money; cost: Money; tax: Money; profit: Money; avgMarginPct: number } {
+        fixedCosts: FixedCosts,
+    ): { revenue: Money; cost: Money; tax: Money; fixedCostTotal: Money; profit: Money; avgMarginPct: number } {
         const revenue = orders.reduce((acc, o) => acc.add(o.sale), Money.zero());
         const cost = orders.reduce((acc, o) => acc.add(o.itemsCost ?? Money.zero()), Money.zero());
         const totalShipping = orders.reduce((acc, o) => acc.add(o.shipping), Money.zero());
         const tax = orders.reduce((acc, o) => acc.add(this.computeTax(o.sale)), Money.zero());
-        const fixedCostTotal = fixedCost.multiplyByQuantity(orders.length);
+        const fixedCostTotal = orders.reduce((acc, o) => acc.add(fixedCosts.totalForOrder(o.itemCount)), Money.zero());
         const profit = revenue
             .subtract(cost)
             .subtract(totalShipping)
             .subtract(totalAds)
             .subtract(fixedCostTotal)
             .subtract(tax);
-        return { revenue, cost, tax, profit, avgMarginPct: profit.percentageOf(revenue) };
+        return { revenue, cost, tax, fixedCostTotal, profit, avgMarginPct: profit.percentageOf(revenue) };
     }
 
     computeCostByCategory(orders: OrderInPeriod[]): { categoryName: string; cost: Money }[] {

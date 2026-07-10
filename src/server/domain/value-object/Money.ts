@@ -1,5 +1,9 @@
-export class Money {
-    private constructor(private readonly cents: number) {}
+import { ValueObject } from "./ValueObject";
+
+export class Money extends ValueObject<{ cents: number }> {
+    private constructor(protected readonly cents: number) {
+        super({ cents });
+    }
 
     static fromCents(cents: number): Money {
         if (!Number.isInteger(cents)) {

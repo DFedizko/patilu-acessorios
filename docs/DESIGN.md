@@ -142,13 +142,13 @@ Catalog (the complete allowed set):
 
 - **Hover:** instant in, ~150ms ease-out out. Transition only `background-color, color, border-color, opacity, box-shadow` — never `transition-all`.
 - **Press:** `active:scale-[0.98]`, 100ms — except high-frequency controls (packing +/− counters): those get **no animation** (actions done 100×/day are never animated).
-- **Modal:** overlay fade 150ms; content `opacity 0→1 + scale 0.97→1` 200ms ease-out. **One entrance for every modal.**
+- **Modal:** configurable entrance catalog via the `Modal` `animation`/`direction` props (`src/components/ui/modal/`), default `fade`. Props map to `data-modal-animation`/`data-modal-direction` on the dialog, styled entirely in `animations.css` (props → CSS, no hook). The catalog (zoom, slide/slide-corner, flip, fold, drop, reveal in 8 directions, pop, bounce, swing, elastic, blur-in, glitch, random) is a **product decision to keep** — this is the one place overshoot/bounce easings are allowed. `prefers-reduced-motion` disables them via a CSS media query. Modal shell stays token-based (`rounded-xl bg-surface shadow-pop`).
 - **Dropdown/popover:** 140–180ms, `scale 0.96→1`, `transform-origin` on the trigger side; exit faster or none.
 - **Chevrons:** `rotate-180` 200ms on open state.
 - **Sidebar:** width 220ms (the one sanctioned layout-property animation: single element, infrequent).
 - Everything wrapped in `motion-safe:` / honoring `prefers-reduced-motion` (replace movement with fades, don't delete feedback).
 
-Bans: bounce/elastic/overshoot easings (`cubic-bezier(.34,1.56,…)`), `ease-in`, glitch/flip/fold/random effects, page-load choreography, animating `width/height/padding/margin` (sidebar excepted), count-up on initial paint.
+Bans (everywhere **except the modal entrance catalog**, which is an explicit product exception): bounce/elastic/overshoot easings (`cubic-bezier(.34,1.56,…)`), `ease-in`, glitch/flip/fold/random effects, page-load choreography, animating `width/height/padding/margin` (sidebar excepted), count-up on initial paint.
 
 ## 9. Component states (non-negotiable)
 
@@ -185,7 +185,7 @@ These apply to every current and future page:
 3. Display font on numbers/data; money not in Geist Mono.
 4. Rainbow KPI values; loss rendered in green/purple.
 5. Colored/oversized drop shadows; glassmorphism; gradient text; side-stripe borders (`border-l-4` accents).
-6. Bounce/elastic/glitch/random animations; `transition-all`; decorative motion.
+6. Bounce/elastic/glitch/random animations (**except the modal entrance catalog** — see §8); `transition-all`; decorative motion.
 7. Nested cards; modal as first resort (prefer inline/progressive disclosure).
 8. Text characters as icons; icon-only controls without `aria-label`.
 9. Delete without undo; blocking confirm for reversible actions.
@@ -211,4 +211,4 @@ P0 defects found at snapshot time — all fixed in Foundation:
 - ~~Period switch blanks the page~~ → `placeholderData: keepPreviousData` + `opacity-60` dim while refetching.
 - ~~No visible focus ring~~ → `focus-ring` utility (2-layer ring, surface offset + primary).
 - ~~Status chips bypass tokens~~ → semantic `positive/warning/primary` soft chips.
-- ~~Modal animation catalog~~ → single sanctioned entrance + `prefers-reduced-motion`.
+- Modal animation catalog + directional entrances: **kept by product decision**, driven purely by the `Modal` `animation`/`direction` props → `data-modal-animation`/`data-modal-direction` attributes styled in `animations.css` (no hook, no CSS-module lookup); reduced-motion handled by a pure CSS media query; only the modal shell was retokenized (surface/shadow/radius).

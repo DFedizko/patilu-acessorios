@@ -3,12 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { frontContainer } from "@/di/container";
 
-export const FIXED_COST_KEY = ["config", "fixed-cost"] as const;
+export const FIXED_COSTS_KEY = ["config", "fixed-costs"] as const;
 
-export const useFixedCost = () => {
+export const useFixedCosts = () => {
     const service = frontContainer.getConfigService();
     return useQuery({
-        queryKey: FIXED_COST_KEY,
-        queryFn: () => service.getFixedCost(),
+        queryKey: FIXED_COSTS_KEY,
+        queryFn: () => service.getFixedCosts(),
     });
 };

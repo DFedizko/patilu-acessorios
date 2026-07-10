@@ -43,7 +43,7 @@ export const DashboardMetricCards = ({ data }: DashboardMetricCardsProps) => {
         },
         {
             label: "Custo",
-            value: data.costCents / 100,
+            value: (data.costCents + data.fixedTotalCents) / 100,
             format: formatCurrency,
             accentClass: "text-ink",
             icon: <CoinsIcon />,
