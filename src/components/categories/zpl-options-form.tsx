@@ -3,21 +3,31 @@
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
+import { Combobox } from "@/components/ui/combobox";
 import { useZplPrintStore } from "@/stores/use-zpl-print-store";
 
-type NumberKey = "labelHeightCm" | "labelWidthCm" | "columns" | "gapCm";
+type NumberKey = "columns" | "gapCm";
 
 const NUMBER_FIELDS: { key: NumberKey; label: string; integer: boolean; step: string }[] = [
-    { key: "labelHeightCm", label: "Altura (cm)", integer: false, step: "0.1" },
-    { key: "labelWidthCm", label: "Largura (cm)", integer: false, step: "0.1" },
     { key: "columns", label: "Colunas", integer: true, step: "1" },
     { key: "gapCm", label: "Espaço entre colunas (cm)", integer: false, step: "0.1" },
+];
+
+const SIZE_OPTIONS = [
+    { value: "2.3", label: "Pequena — código 1,81cm", heightCm: 1.7 },
+    { value: "4.1", label: "Média — código 3,63cm", heightCm: 3 },
+    { value: "5.9", label: "Grande — código 5,44cm", heightCm: 4.3 },
 ];
 
 export const ZplOptionsForm = () => {
     const layout = useZplPrintStore((state) => state.layout);
     const setLayout = useZplPrintStore((state) => state.setLayout);
     const resetLayout = useZplPrintStore((state) => state.resetLayout);
+    const selectSize = (value: string) => {
+        const option = SIZE_OPTIONS.find((size) => size.value === value)!;
+        setLayout("labelWidthCm", Number(option.value));
+        setLayout("labelHeightCm", option.heightCm);
+    };
     return (
         <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
@@ -26,6 +36,14 @@ export const ZplOptionsForm = () => {
                     Restaurar padrão
                 </Button>
             </div>
+            <Field label="Tamanho">
+                <Combobox
+                    options={SIZE_OPTIONS}
+                    value={String(layout.labelWidthCm)}
+                    onChange={selectSize}
+                    placeholder="Selecione o tamanho"
+                />
+            </Field>
             <div className="grid grid-cols-2 gap-3">
                 {NUMBER_FIELDS.map((field) => (
                     <Field key={field.key} label={field.label}>

@@ -7,7 +7,7 @@ const STORAGE_KEY = "zpl-label-layout:v1";
 
 export const DEFAULT_LABEL_LAYOUT: ZplLayout = {
     columns: 2,
-    labelWidthCm: 5,
+    labelWidthCm: 4.1,
     labelHeightCm: 3,
     gapCm: 0.2,
     dpi: 203,
