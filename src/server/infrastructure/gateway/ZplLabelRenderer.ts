@@ -24,21 +24,30 @@ export class ZplLabelRenderer implements IZplLabelRenderer {
         const printWidthDots = Math.round((layout.columns * pitchCm - layout.gapCm) * dotsPerCm);
         const barcodeHeightDots = Math.round(layout.labelHeightCm * dotsPerCm * BARCODE_HEIGHT_RATIO);
         const insetDots = Math.round(LABEL_INSET_CM * dotsPerCm);
-        const usableWidthDots = Math.round(layout.labelWidthCm * dotsPerCm) - insetDots * 2;
+        const labelWidthDots = Math.round(layout.labelWidthCm * dotsPerCm);
         const humanReadable = layout.printHumanReadable ? "Y" : "N";
         const fields = row.map((barcode, index) => {
-            const moduleDots = this.moduleWidthFor(barcode, usableWidthDots);
-            const originX = Math.round(index * pitchCm * dotsPerCm) + insetDots;
+            const moduleDots = this.moduleWidthFor(barcode, labelWidthDots);
+            const columnLeftDots = Math.round(index * pitchCm * dotsPerCm);
+            const originX = columnLeftDots + this.centeringOffset(barcode, moduleDots, labelWidthDots);
             const barcode128 = `^BCN,${barcodeHeightDots},${humanReadable},${INTERPRETATION_LINE_ABOVE},${UCC_CHECK_DIGIT},${CODE128_AUTOMATIC_MODE}`;
             return `^FO${originX},${insetDots}^BY${moduleDots}${barcode128}^FD${barcode}^FS`;
         });
         return ["^XA", `^PW${printWidthDots}`, `^LL${rowHeightDots}`, ...fields, "^XZ"].join("\n");
     }
 
-    private moduleWidthFor(barcode: string, usableWidthDots: number): number {
-        const totalModules = CODE128_MODULES_PER_CHAR * barcode.length + CODE128_FIXED_MODULES;
-        const fitted = Math.floor(usableWidthDots / totalModules);
+    private moduleWidthFor(barcode: string, labelWidthDots: number): number {
+        const fitted = Math.floor(labelWidthDots / this.totalModulesFor(barcode));
         return Math.min(MAX_MODULE_DOTS, Math.max(MIN_MODULE_DOTS, fitted));
+    }
+
+    private centeringOffset(barcode: string, moduleDots: number, labelWidthDots: number): number {
+        const barcodeWidthDots = moduleDots * this.totalModulesFor(barcode);
+        return Math.max(0, Math.round((labelWidthDots - barcodeWidthDots) / 2));
+    }
+
+    private totalModulesFor(barcode: string): number {
+        return CODE128_MODULES_PER_CHAR * barcode.length + CODE128_FIXED_MODULES;
     }
 
     private chunkByColumns(barcodes: string[], columns: number): string[][] {
