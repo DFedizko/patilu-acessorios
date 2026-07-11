@@ -4,7 +4,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { useLabelStore } from "@/stores/use-label-store";
 import { useRenderZpl } from "@/hooks/query/useRenderZpl";
-import { DEFAULT_ZPL_OPTIONS } from "@/stores/use-zpl-print-store";
+import { useZplPrintStore } from "@/stores/use-zpl-print-store";
 import { formatCurrency } from "@/utils/format";
 import { Modal } from "@/components/ui/modal/Modal";
 import { ModalHeader } from "@/components/ui/modal/ModalHeader";
@@ -14,7 +14,8 @@ import { Button } from "@/components/ui/button";
 export const LabelModal = () => {
     const tier = useLabelStore((state) => state.tier);
     const close = useLabelStore((state) => state.close);
-    const payload = tier ? { items: [{ tierId: tier.id, quantity: 1 }], options: DEFAULT_ZPL_OPTIONS } : null;
+    const layout = useZplPrintStore((state) => state.layout);
+    const payload = tier ? { items: [{ tierId: tier.id, quantity: 1 }], layout: { ...layout, columns: 1 } } : null;
     const { data, isFetching } = useRenderZpl(payload);
     const zpl = data?.zpl ?? "";
     const copy = async () => {

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import "./animations.css";
 
-export type ModalSize = "xs" | "sm" | "md" | "lg" | "xl";
+export type ModalSize = "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 
 export type ModalAnimation =
     | "fade"
@@ -33,6 +33,7 @@ const SIZE_CLASSES: Record<ModalSize, string> = {
     md: "w-[34rem] h-[26rem]",
     lg: "w-[44rem] h-[34rem]",
     xl: "w-[58rem] h-[42rem]",
+    xxl: "w-[72rem] h-[50rem]",
 };
 
 const ANIMATION_POOL: ModalAnimation[] = [

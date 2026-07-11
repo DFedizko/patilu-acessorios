@@ -16,7 +16,7 @@ export class RenderTierLabelUseCase implements IRenderTierLabelUseCase {
 
     async execute(input: Input): Promise<Output> {
         const tier = await this.tierRepo.findById(input.id);
-        const svg = this.barcodeRenderer.toSVG(tier.getBarcode().toString());
+        const svg = this.barcodeRenderer.toSVG(tier.getBarcode().toString(), { showText: input.showText });
         return { svg };
     }
 }

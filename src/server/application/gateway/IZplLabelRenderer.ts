@@ -1,11 +1,12 @@
-export type ZplLabelOptions = {
-    heightDots: number;
-    moduleWidthDots: number;
-    originXDots: number;
-    originYDots: number;
+export type ZplLayout = {
+    columns: number;
+    labelWidthCm: number;
+    labelHeightCm: number;
+    gapCm: number;
+    dpi: number;
     printHumanReadable: boolean;
 };
 
 export interface IZplLabelRenderer {
-    toZpl(input: { barcode: string; quantity: number; options: ZplLabelOptions }): string;
+    toZpl(input: { barcodes: string[]; layout: ZplLayout }): string;
 }

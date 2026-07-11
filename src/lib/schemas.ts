@@ -101,6 +101,17 @@ export const updateTierSchema = z.object({
 
 export type UpdateTierDTO = z.input<typeof updateTierSchema>;
 
+export const zplLayoutSchema = z.object({
+    columns: z.number().int().min(1, "Mínimo 1 coluna").max(4, "Máximo 4 colunas"),
+    labelWidthCm: z.number().positive("Largura inválida").max(20, "Largura inválida"),
+    labelHeightCm: z.number().positive("Altura inválida").max(20, "Altura inválida"),
+    gapCm: z.number().min(0, "Espaço inválido").max(5, "Espaço inválido"),
+    dpi: z.number().int().min(150, "DPI inválido").max(600, "DPI inválido"),
+    printHumanReadable: z.boolean(),
+});
+
+export type ZplLayoutDTO = z.input<typeof zplLayoutSchema>;
+
 export const renderLabelsZplSchema = z.object({
     items: z
         .array(
@@ -110,13 +121,7 @@ export const renderLabelsZplSchema = z.object({
             }),
         )
         .min(1, "Selecione ao menos uma faixa"),
-    options: z.object({
-        heightDots: z.number().int().min(10, "Altura inválida").max(600, "Altura inválida"),
-        moduleWidthDots: z.number().int().min(1, "Largura de módulo inválida").max(10, "Largura de módulo inválida"),
-        originXDots: z.number().int().min(0, "Posição inválida").max(2000, "Posição inválida"),
-        originYDots: z.number().int().min(0, "Posição inválida").max(2000, "Posição inválida"),
-        printHumanReadable: z.boolean(),
-    }),
+    layout: zplLayoutSchema,
 });
 
 export type RenderLabelsZplDTO = z.input<typeof renderLabelsZplSchema>;

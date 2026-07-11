@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, InputHTMLAttributes } from "react";
-import { SearchIcon } from "@/components/ui/icons/search-icon";
+import { SearchInput } from "@/components/ui/search-input";
 
 const DEFAULT_DEBOUNCE_MS = 100;
 
@@ -39,15 +39,5 @@ export const DebouncedInput = ({
         if (timerRef.current) clearTimeout(timerRef.current);
         timerRef.current = setTimeout(() => onDebounceRef.current(next), debounceMs);
     };
-    return (
-        <div className="flex items-center gap-2 input-base px-3">
-            <input
-                value={value}
-                onChange={handleChange}
-                className={`w-full border-none bg-transparent py-2.5 text-sm text-ink outline-none placeholder:text-ink-muted ${className}`}
-                {...inputProps}
-            />
-            <SearchIcon className="size-4 shrink-0 text-ink-muted" />
-        </div>
-    );
+    return <SearchInput value={value} onChange={handleChange} className={className} {...inputProps} />;
 };

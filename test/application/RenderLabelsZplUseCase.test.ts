@@ -10,11 +10,12 @@ import { RenderLabelsZplUseCase } from "@/server/application/use-case/RenderLabe
 import { NotFoundError } from "@/server/infrastructure/errors/NotFoundError";
 import type { RenderLabelsZplDTO } from "@/lib/schemas";
 
-const OPTIONS: RenderLabelsZplDTO["options"] = {
-    heightDots: 100,
-    moduleWidthDots: 2,
-    originXDots: 30,
-    originYDots: 30,
+const LAYOUT: RenderLabelsZplDTO["layout"] = {
+    columns: 2,
+    labelWidthCm: 5,
+    labelHeightCm: 3,
+    gapCm: 0.2,
+    dpi: 203,
     printHumanReadable: true,
 };
 
@@ -31,7 +32,7 @@ describe("RenderLabelsZplUseCase", () => {
         renderZpl = new RenderLabelsZplUseCase(tierRepo, new ZplLabelRenderer());
     });
 
-    it("builds one ZPL block per tier carrying its barcode and requested quantity", async () => {
+    it("lays out the barcodes in rows of N columns with each barcode present", async () => {
         // Arrange
         const pen = await createTier.execute({ name: "Caneta R$1", costReais: 1 });
         const notebook = await createTier.execute({ name: "Caderno R$8", costReais: 8 });
@@ -42,15 +43,37 @@ describe("RenderLabelsZplUseCase", () => {
                 { tierId: pen.id, quantity: 3 },
                 { tierId: notebook.id, quantity: 2 },
             ],
-            options: OPTIONS,
+            layout: LAYOUT,
         });
 
         // Assert
-        expect(result.zpl.match(/\^XA/g)).toHaveLength(2);
+        expect(result.zpl.match(/\^XA/g)).toHaveLength(3);
+        expect(result.zpl.match(/\^FD/g)).toHaveLength(5);
         expect(result.zpl).toContain(`^FD${pen.barcode}^FS`);
         expect(result.zpl).toContain(`^FD${notebook.barcode}^FS`);
-        expect(result.zpl).toContain("^PQ3,0,0,N");
-        expect(result.zpl).toContain("^PQ2,0,0,N");
+        expect(result.zpl).toContain("^PW");
+        expect(result.zpl).toContain("^LL");
+    });
+
+    it("does not duplicate to fill columns when the count is odd or single", async () => {
+        // Arrange
+        const pen = await createTier.execute({ name: "Caneta R$1", costReais: 1 });
+
+        // Act
+        const single = await renderZpl.execute({
+            items: [{ tierId: pen.id, quantity: 1 }],
+            layout: LAYOUT,
+        });
+        const odd = await renderZpl.execute({
+            items: [{ tierId: pen.id, quantity: 3 }],
+            layout: LAYOUT,
+        });
+
+        // Assert
+        expect(single.zpl.match(/\^XA/g)).toHaveLength(1);
+        expect(single.zpl.match(/\^FD/g)).toHaveLength(1);
+        expect(odd.zpl.match(/\^XA/g)).toHaveLength(2);
+        expect(odd.zpl.match(/\^FD/g)).toHaveLength(3);
     });
 
     it("throws TIER_NOT_FOUND when a requested tier id does not exist", async () => {
@@ -61,7 +84,7 @@ describe("RenderLabelsZplUseCase", () => {
         try {
             await renderZpl.execute({
                 items: [{ tierId: "00000000-0000-4000-8000-000000000000", quantity: 1 }],
-                options: OPTIONS,
+                layout: LAYOUT,
             });
         } catch (error) {
             thrown = error;

@@ -17,13 +17,9 @@ export class RenderLabelsZplUseCase implements IRenderLabelsZplUseCase {
     async execute(input: Input): Promise<Output> {
         const tiers = await this.tierRepo.findByIds(input.items.map((item) => item.tierId));
         const tiersById = new Map(tiers.map((tier) => [tier.id.value, tier]));
-        const blocks = input.items.map((item) =>
-            this.zplRenderer.toZpl({
-                barcode: tiersById.get(item.tierId)!.getBarcode().toString(),
-                quantity: item.quantity,
-                options: input.options,
-            }),
+        const barcodes = input.items.flatMap((item) =>
+            Array.from({ length: item.quantity }, () => tiersById.get(item.tierId)!.getBarcode().toString()),
         );
-        return { zpl: blocks.join("\n") };
+        return { zpl: this.zplRenderer.toZpl({ barcodes, layout: input.layout }) };
     }
 }

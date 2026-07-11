@@ -123,14 +123,15 @@ const QUIET_MODULES = 10;
 const TEXT_HEIGHT = 20;
 
 export class Code128BarcodeRenderer implements IBarcodeRenderer {
-    toSVG(text: string): string {
+    toSVG(text: string, options?: { showText?: boolean }): string {
+        const showText = options?.showText ?? true;
         const codes = this.encode(text);
         const modules = codes.map((code) => CODE128_PATTERNS[code]).join("");
         const totalModules = QUIET_MODULES * 2 + this.countModules(modules);
         const width = totalModules * MODULE_WIDTH;
-        const height = BAR_HEIGHT + TEXT_HEIGHT;
+        const height = showText ? BAR_HEIGHT + TEXT_HEIGHT : BAR_HEIGHT;
         const bars = this.buildBars(modules);
-        return this.wrapSvg(bars, width, height, text);
+        return this.wrapSvg(bars, width, height, showText ? text : null);
     }
 
     private encode(text: string): number[] {
@@ -178,14 +179,17 @@ export class Code128BarcodeRenderer implements IBarcodeRenderer {
         return rects.join("");
     }
 
-    private wrapSvg(bars: string, width: number, height: number, text: string): string {
-        const label = this.escape(text);
+    private wrapSvg(bars: string, width: number, height: number, text: string | null): string {
         const textY = BAR_HEIGHT + TEXT_HEIGHT - 5;
+        const label =
+            text === null
+                ? ""
+                : `<text x="${width / 2}" y="${textY}" font-family="monospace" font-size="16" text-anchor="middle" fill="#000000">${this.escape(text)}</text>`;
         return (
             `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
             `<rect width="${width}" height="${height}" fill="#ffffff"/>` +
             `<g fill="#000000">${bars}</g>` +
-            `<text x="${width / 2}" y="${textY}" font-family="monospace" font-size="16" text-anchor="middle" fill="#000000">${label}</text>` +
+            label +
             `</svg>`
         );
     }
