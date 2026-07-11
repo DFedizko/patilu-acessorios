@@ -14,9 +14,9 @@ const NUMBER_FIELDS: { key: NumberKey; label: string; integer: boolean; step: st
 ];
 
 const SIZE_OPTIONS = [
-    { value: "2.3", label: "Pequena — código 1,81cm", heightCm: 1.7 },
-    { value: "4.1", label: "Média — código 3,63cm", heightCm: 3 },
-    { value: "5.9", label: "Grande — código 5,44cm", heightCm: 4.3 },
+    { value: "1.8", label: "Pequena — código 1,26cm", heightCm: 1.3 },
+    { value: "3.0", label: "Média — código 2,53cm", heightCm: 2.2 },
+    { value: "4.3", label: "Grande — código 3,79cm", heightCm: 3.1 },
 ];
 
 export const ZplOptionsForm = () => {

@@ -32,7 +32,7 @@ describe("CreateTierUseCase", () => {
         expect(result.id).toBeDefined();
         expect(result.name).toBe("Caneta R$1");
         expect(result.costCents).toBe(100);
-        expect(result.barcode).toMatch(/^T[A-Za-z0-9_-]{10}$/);
+        expect(result.barcode).toMatch(/^T[A-Za-z0-9_-]{5}$/);
         expect(result.categoryId).toBeNull();
         const saved = await testPrisma.tier.findUnique({ where: { id: result.id } });
         expect(saved).not.toBeNull();
