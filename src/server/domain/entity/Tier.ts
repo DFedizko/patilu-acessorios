@@ -2,6 +2,8 @@ import { DomainError } from "@/server/domain/error/DomainError";
 import { TierCostMustBePositiveError } from "@/server/domain/error/TierCostMustBePositiveError";
 import { Barcode } from "@/server/domain/value-object/Barcode";
 import { Money } from "@/server/domain/value-object/Money";
+import { UUID } from "@/server/domain/value-object/UUID";
+import { Entity } from "./Entity";
 
 type CreateProps = {
     name: string;
@@ -20,16 +22,22 @@ type RestoreProps = {
     updatedAt: Date;
 };
 
-export class Tier {
+type TierProps = {
+    name: string;
+    cost: Money;
+    barcode: Barcode;
+    categoryId: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+export class Tier extends Entity<TierProps, UUID> {
     private constructor(
-        private readonly id: string,
-        private name: string,
-        private cost: Money,
-        private readonly barcode: Barcode,
-        private categoryId: string | null,
-        private readonly createdAt: Date,
-        private readonly updatedAt: Date,
-    ) {}
+        protected readonly props: TierProps,
+        id?: UUID,
+    ) {
+        super(props, id);
+    }
 
     static create(props: CreateProps): Tier {
         if (!props.name || props.name.trim().length === 0) {
@@ -38,26 +46,27 @@ export class Tier {
         if (!props.cost.isPositive()) {
             throw new TierCostMustBePositiveError();
         }
-        return new Tier(
-            crypto.randomUUID(),
-            props.name.trim(),
-            props.cost,
-            props.barcode,
-            props.categoryId ?? null,
-            new Date(),
-            new Date(),
-        );
+        return new Tier({
+            name: props.name.trim(),
+            cost: props.cost,
+            barcode: props.barcode,
+            categoryId: props.categoryId ?? null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
     }
 
     static restore(props: RestoreProps): Tier {
         return new Tier(
-            props.id,
-            props.name,
-            props.cost,
-            props.barcode,
-            props.categoryId,
-            props.createdAt,
-            props.updatedAt,
+            {
+                name: props.name,
+                cost: props.cost,
+                barcode: props.barcode,
+                categoryId: props.categoryId,
+                createdAt: props.createdAt,
+                updatedAt: props.updatedAt,
+            },
+            UUID.restore(props.id),
         );
     }
 
@@ -65,45 +74,41 @@ export class Tier {
         if (!name || name.trim().length === 0) {
             throw new DomainError("TIER_NAME_REQUIRED", 422, "Tier name is required");
         }
-        this.name = name.trim();
+        this.props.name = name.trim();
     }
 
     changeCost(cost: Money): void {
         if (!cost.isPositive()) {
             throw new TierCostMustBePositiveError();
         }
-        this.cost = cost;
+        this.props.cost = cost;
     }
 
     assignToCategory(categoryId: string): void {
-        this.categoryId = categoryId;
+        this.props.categoryId = categoryId;
     }
 
     moveToUncategorized(): void {
-        this.categoryId = null;
-    }
-
-    getId(): string {
-        return this.id;
+        this.props.categoryId = null;
     }
 
     getName(): string {
-        return this.name;
+        return this.props.name;
     }
 
     getBarcode(): Barcode {
-        return this.barcode;
+        return this.props.barcode;
     }
 
     getCost(): Money {
-        return this.cost;
+        return this.props.cost;
     }
 
     getCategoryId(): string | null {
-        return this.categoryId;
+        return this.props.categoryId;
     }
 
     getCreatedAt(): Date {
-        return this.createdAt;
+        return this.props.createdAt;
     }
 }

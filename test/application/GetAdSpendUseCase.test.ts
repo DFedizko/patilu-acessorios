@@ -9,9 +9,7 @@ import type { Period } from "@/server/domain/value-object/Period";
 import { truncateAll } from "../helpers/truncate";
 import { testPrisma } from "../helpers/prisma";
 
-const makeTikTokAdsGateway = (
-    result: { amountCents: number } | { unavailable: true },
-): ITikTokAdsGateway => ({
+const makeTikTokAdsGateway = (result: { amountCents: number } | { unavailable: true }): ITikTokAdsGateway => ({
     getSpend: async (_period: Period) => result,
 });
 
@@ -25,7 +23,9 @@ describe("GetAdSpendUseCase", () => {
 
     it("returns TikTok total when TikTok is available", async () => {
         // Arrange
-        const useCase = new GetAdSpendUseCase(new AdSpendResolver(adSpendGateway, makeTikTokAdsGateway({ amountCents: 50000 })));
+        const useCase = new GetAdSpendUseCase(
+            new AdSpendResolver(adSpendGateway, makeTikTokAdsGateway({ amountCents: 50000 })),
+        );
 
         // Act
         const result = await useCase.execute({ period: "today" });
@@ -41,7 +41,9 @@ describe("GetAdSpendUseCase", () => {
         const midWeek = new Date();
         midWeek.setDate(midWeek.getDate() - 5);
         await adSpendGateway.upsertDay(midWeek, 20000, "MANUAL");
-        const useCase = new GetAdSpendUseCase(new AdSpendResolver(adSpendGateway, makeTikTokAdsGateway({ unavailable: true })));
+        const useCase = new GetAdSpendUseCase(
+            new AdSpendResolver(adSpendGateway, makeTikTokAdsGateway({ unavailable: true })),
+        );
 
         // Act
         const result = await useCase.execute({ period: "week" });
@@ -54,7 +56,9 @@ describe("GetAdSpendUseCase", () => {
 
     it("returns zero when TikTok unavailable and no manual data exists", async () => {
         // Arrange — empty DB, TikTok unavailable
-        const useCase = new GetAdSpendUseCase(new AdSpendResolver(adSpendGateway, makeTikTokAdsGateway({ unavailable: true })));
+        const useCase = new GetAdSpendUseCase(
+            new AdSpendResolver(adSpendGateway, makeTikTokAdsGateway({ unavailable: true })),
+        );
 
         // Act
         const result = await useCase.execute({ period: "week" });

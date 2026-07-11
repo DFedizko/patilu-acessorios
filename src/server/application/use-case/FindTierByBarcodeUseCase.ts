@@ -19,7 +19,7 @@ export class FindTierByBarcodeUseCase implements IFindTierByBarcodeUseCase {
 }
 
 const toOutput = (tier: Tier): Output => ({
-    id: tier.getId(),
+    id: tier.id.value,
     name: tier.getName(),
     costCents: tier.getCost().toCents(),
     barcode: tier.getBarcode().toString(),

@@ -1,98 +1,101 @@
 import { Money } from "@/server/domain/value-object/Money";
+import { UUID } from "@/server/domain/value-object/UUID";
 import { OrderCannotBePackedError } from "@/server/domain/error/OrderCannotBePackedError";
+import { Entity } from "./Entity";
 
 export type ShipmentStatus = "PENDING" | "SHIPPED" | "CANCELLED";
 export type PackingStatus = "NOT_PACKED" | "PACKED";
 
-type OrderProps = {
+type RestoreProps = {
     id: string;
     tiktokOrderId: string;
     orderNumber: string;
     recipientName: string | null;
-    saleCents: number;
-    shippingCents: number;
+    saleAmount: Money;
+    shippingAmount: Money;
     orderedAt: Date;
     shipmentStatus: ShipmentStatus;
     packingStatus: PackingStatus;
 };
 
-export class Order {
-    private readonly id: string;
-    private readonly tiktokOrderId: string;
-    private readonly orderNumber: string;
-    private readonly recipientName: string | null;
-    private readonly saleCents: number;
-    private readonly shippingCents: number;
-    private readonly orderedAt: Date;
-    private shipmentStatus: ShipmentStatus;
-    private packingStatus: PackingStatus;
+type CreateProps = Omit<RestoreProps, "id">;
 
-    private constructor(props: OrderProps) {
-        this.id = props.id;
-        this.tiktokOrderId = props.tiktokOrderId;
-        this.orderNumber = props.orderNumber;
-        this.recipientName = props.recipientName;
-        this.saleCents = props.saleCents;
-        this.shippingCents = props.shippingCents;
-        this.orderedAt = props.orderedAt;
-        this.shipmentStatus = props.shipmentStatus;
-        this.packingStatus = props.packingStatus;
+type OrderProps = CreateProps;
+
+export class Order extends Entity<OrderProps, UUID> {
+    private constructor(
+        protected readonly props: OrderProps,
+        id?: UUID,
+    ) {
+        super(props, id);
     }
 
-    static restore(props: OrderProps): Order {
+    static create(props: CreateProps): Order {
         return new Order(props);
     }
 
+    static restore(props: RestoreProps): Order {
+        return new Order(
+            {
+                tiktokOrderId: props.tiktokOrderId,
+                orderNumber: props.orderNumber,
+                recipientName: props.recipientName,
+                saleAmount: props.saleAmount,
+                shippingAmount: props.shippingAmount,
+                orderedAt: props.orderedAt,
+                shipmentStatus: props.shipmentStatus,
+                packingStatus: props.packingStatus,
+            },
+            UUID.restore(props.id),
+        );
+    }
+
     canBePacked(): boolean {
-        return this.shipmentStatus !== "CANCELLED";
+        return this.props.shipmentStatus !== "CANCELLED";
     }
 
     markPacked(): void {
         if (!this.canBePacked()) throw new OrderCannotBePackedError();
-        this.packingStatus = "PACKED";
+        this.props.packingStatus = "PACKED";
     }
 
     markNotPacked(): void {
-        this.packingStatus = "NOT_PACKED";
+        this.props.packingStatus = "NOT_PACKED";
     }
 
     applyShipmentStatus(status: ShipmentStatus): void {
-        this.shipmentStatus = status;
-    }
-
-    getId(): string {
-        return this.id;
+        this.props.shipmentStatus = status;
     }
 
     getTiktokOrderId(): string {
-        return this.tiktokOrderId;
+        return this.props.tiktokOrderId;
     }
 
     getOrderNumber(): string {
-        return this.orderNumber;
+        return this.props.orderNumber;
     }
 
     getRecipientName(): string | null {
-        return this.recipientName;
+        return this.props.recipientName;
     }
 
     getSale(): Money {
-        return Money.fromCents(this.saleCents);
+        return this.props.saleAmount;
     }
 
     getShipping(): Money {
-        return Money.fromCents(this.shippingCents);
+        return this.props.shippingAmount;
     }
 
     getOrderedAt(): Date {
-        return this.orderedAt;
+        return this.props.orderedAt;
     }
 
     getShipmentStatus(): ShipmentStatus {
-        return this.shipmentStatus;
+        return this.props.shipmentStatus;
     }
 
     getPackingStatus(): PackingStatus {
-        return this.packingStatus;
+        return this.props.packingStatus;
     }
 }

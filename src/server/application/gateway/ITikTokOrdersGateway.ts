@@ -2,6 +2,7 @@ import type { Period } from "@/server/domain/value-object/Period";
 
 export type TikTokOrderStatus =
     | "UNPAID"
+    | "ON_HOLD"
     | "AWAITING_SHIPMENT"
     | "AWAITING_COLLECTION"
     | "PARTIALLY_SHIPPING"

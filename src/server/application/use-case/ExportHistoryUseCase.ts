@@ -4,12 +4,13 @@ import { SYMBOLS } from "@/server/di/symbols";
 import type { IGetHistoryUseCase } from "./contracts/IGetHistoryUseCase";
 import type { IExportHistoryUseCase, Input, Output } from "./contracts/IExportHistoryUseCase";
 import type { HistoryRow } from "@/lib/schemas";
+import { Money } from "@/server/domain/value-object/Money";
 
 const CSV_HEADER = "Data,Cliente,Hora,Venda,Custo,CPA,Impostos,Custo fixo,Margem R$,Margem %";
 
 const pad = (n: number): string => n.toString().padStart(2, "0");
 
-const formatMoney = (cents: number): string => (cents / 100).toFixed(2);
+const formatMoney = (cents: number): string => Money.fromCents(cents).toDecimalString();
 
 const escapeCell = (value: string): string => {
     if (value.includes(",") || value.includes('"') || value.includes("\n")) {

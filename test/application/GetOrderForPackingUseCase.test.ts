@@ -32,7 +32,7 @@ describe("GetOrderForPackingUseCase", () => {
         const result = await getOrderForPacking.execute({ orderId: order.id });
 
         // Assert
-        expect(result.order.getId()).toBe(order.id);
+        expect(result.order.id.value).toBe(order.id);
         expect(result.packing).toBeNull();
     });
 
@@ -51,7 +51,7 @@ describe("GetOrderForPackingUseCase", () => {
         const result = await getOrderForPacking.execute({ orderId: order.id });
 
         // Assert
-        expect(result.order.getId()).toBe(order.id);
+        expect(result.order.id.value).toBe(order.id);
         expect(result.packing).not.toBeNull();
         expect(result.packing?.getItems()).toHaveLength(1);
         expect(result.packing?.getItems()[0].getQuantity()).toBe(2);
@@ -63,7 +63,7 @@ describe("GetOrderForPackingUseCase", () => {
 
         // Act
         try {
-            await getOrderForPacking.execute({ orderId: "non-existent-order" });
+            await getOrderForPacking.execute({ orderId: "00000000-0000-4000-8000-000000000000" });
         } catch (error) {
             thrown = error;
         }

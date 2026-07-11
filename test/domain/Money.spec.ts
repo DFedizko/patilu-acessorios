@@ -162,4 +162,24 @@ describe("Money", () => {
             expect(Money.fromCents(-1).isPositive()).toBe(false);
         });
     });
+
+    describe("toDecimalString", () => {
+        it("formats cents as a plain two-decimal string with a dot separator", () => {
+            expect(Money.fromCents(123456).toDecimalString()).toBe("1234.56");
+        });
+
+        it("keeps two decimals for round values", () => {
+            expect(Money.fromCents(500).toDecimalString()).toBe("5.00");
+        });
+    });
+
+    describe("toBRL", () => {
+        it("formats cents as Brazilian currency with R$, thousands dot and decimal comma", () => {
+            expect(Money.fromCents(123456).toBRL()).toBe("R$ 1.234,56");
+        });
+
+        it("formats zero as R$ 0,00", () => {
+            expect(Money.zero().toBRL()).toBe("R$ 0,00");
+        });
+    });
 });

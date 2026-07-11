@@ -31,7 +31,12 @@ describe("UpdateTierUseCase", () => {
         const tier = await createTier.execute({ name: "Caneta R$1", costReais: 1 });
 
         // Act
-        const result = await updateTier.execute({ id: tier.id, name: "Caneta R$2", costReais: 2, categoryId: category.id });
+        const result = await updateTier.execute({
+            id: tier.id,
+            name: "Caneta R$2",
+            costReais: 2,
+            categoryId: category.id,
+        });
 
         // Assert
         expect(result.name).toBe("Caneta R$2");
@@ -48,7 +53,7 @@ describe("UpdateTierUseCase", () => {
 
         // Act
         try {
-            await updateTier.execute({ id: "non-existent-id", name: "Qualquer" });
+            await updateTier.execute({ id: "00000000-0000-4000-8000-000000000000", name: "Qualquer" });
         } catch (error) {
             thrown = error;
         }

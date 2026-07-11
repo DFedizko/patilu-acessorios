@@ -56,6 +56,20 @@ describe("GetHistoryUseCase", () => {
         expect(result.summary.profitCents).toBe(0);
     });
 
+    it("excludes cancelled orders from rows and summary (no cost/profit counted)", async () => {
+        // Arrange — one valid order and one cancelled order in the same period
+        await givenOrder({ saleCents: 5000, shipmentStatus: "PENDING", orderedAt: daysAgo(1) });
+        await givenOrder({ saleCents: 9999, shipmentStatus: "CANCELLED", orderedAt: daysAgo(1) });
+
+        // Act
+        const result = await getHistory.execute({ period: "week" });
+
+        // Assert — cancelled order is disregarded entirely
+        expect(result.rows).toHaveLength(1);
+        expect(result.summary.orderCount).toBe(1);
+        expect(result.summary.revenueCents).toBe(5000);
+    });
+
     it("computes CPA = totalAds / orderCount for orders in period", async () => {
         // Arrange — 1 packed order, 1000 cents total ads → CPA = 1000
         const order = await givenOrder({ saleCents: 5000, shippingCents: 500, orderedAt: daysAgo(1) });

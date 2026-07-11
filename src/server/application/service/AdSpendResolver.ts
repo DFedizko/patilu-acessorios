@@ -20,7 +20,6 @@ export class AdSpendResolver implements IAdSpendResolver {
         const period = resolvePeriod(input);
         const tikTokResult = await this.tikTokAdsGateway.getSpend(period);
         if ("amountCents" in tikTokResult) {
-            await this.adSpendGateway.upsertDay(period.start, tikTokResult.amountCents, "TIKTOK");
             return { totalCents: tikTokResult.amountCents, available: true, source: "TIKTOK" };
         }
         const totalCents = await this.adSpendGateway.sumManualByPeriod(period);

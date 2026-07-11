@@ -23,6 +23,17 @@ export class TierPrismaRepository implements ITierRepository {
         return this.mapToEntity(record);
     }
 
+    async findByIds(ids: string[]): Promise<Tier[]> {
+        const uniqueIds = [...new Set(ids)];
+        const records = await this.prisma.tier.findMany({ where: { id: { in: uniqueIds } } });
+        if (records.length !== uniqueIds.length) {
+            const foundIds = new Set(records.map((record) => record.id));
+            const missingId = uniqueIds.find((id) => !foundIds.has(id));
+            throw new NotFoundError(`Tier not found: ${missingId}`, "TIER_NOT_FOUND");
+        }
+        return records.map((record) => this.mapToEntity(record));
+    }
+
     async findByBarcode(barcode: string): Promise<Tier> {
         const record = await this.prisma.tier.findUnique({ where: { barcode } });
         if (!record) {
@@ -44,9 +55,9 @@ export class TierPrismaRepository implements ITierRepository {
     async save(tier: Tier): Promise<void> {
         try {
             await this.prisma.tier.upsert({
-                where: { id: tier.getId() },
+                where: { id: tier.id.value },
                 create: {
-                    id: tier.getId(),
+                    id: tier.id.value,
                     name: tier.getName(),
                     costCents: tier.getCost().toCents(),
                     barcode: tier.getBarcode().toString(),

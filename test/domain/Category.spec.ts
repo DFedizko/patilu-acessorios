@@ -50,13 +50,13 @@ describe("Category", () => {
 
     describe("restore", () => {
         it("restores a category from persisted data", () => {
-            const id = "some-persisted-id";
+            const id = "00000000-0000-4000-8000-000000000005";
             const createdAt = new Date("2024-01-01");
             const updatedAt = new Date("2024-01-02");
 
             const category = Category.restore({ id, name: "Canetas", createdAt, updatedAt });
 
-            expect(category.id).toBe(id);
+            expect(category.id.value).toBe(id);
             expect(category.getName()).toBe("Canetas");
             expect(category.getCreatedAt()).toBe(createdAt);
         });

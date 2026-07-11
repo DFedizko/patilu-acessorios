@@ -31,8 +31,8 @@ export class GetDashboardUseCase implements IGetDashboardUseCase {
         ]);
         const totalAds = Money.fromCents(adSpend.totalCents);
         const periodProfit = this.calculator.computePeriodProfit(orders, totalAds, fixedCosts);
-        const granularity = input.period === "today" ? "hour" : "day";
-        const marginSeries = this.calculator.computeMarginSeries(orders, granularity);
+        const isSingleDay = period.start.getTime() === period.end.getTime();
+        const salesSeries = this.calculator.computeSalesSeries(orders, isSingleDay ? "order" : "day");
         const costByCategory = this.calculator.computeCostByCategory(orders);
         return {
             revenueCents: periodProfit.revenue.toCents(),
@@ -42,7 +42,7 @@ export class GetDashboardUseCase implements IGetDashboardUseCase {
             profitCents: periodProfit.profit.toCents(),
             avgMarginPct: periodProfit.avgMarginPct,
             orderCount: orders.length,
-            marginSeries,
+            salesSeries,
             costByCategory: costByCategory.map((c) => ({ categoryName: c.categoryName, costCents: c.cost.toCents() })),
             adsAvailable: adSpend.available,
         };

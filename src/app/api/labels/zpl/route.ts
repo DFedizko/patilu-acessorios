@@ -1,0 +1,33 @@
+import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth";
+import { toHttpResponse } from "@/lib/http-error";
+import { renderLabelsZplSchema } from "@/lib/schemas";
+import { container } from "@/server/di/container";
+import { SYMBOLS } from "@/server/di/symbols";
+import type { IRenderLabelsZplUseCase } from "@/server/application/use-case/contracts/IRenderLabelsZplUseCase";
+
+export async function POST(request: Request) {
+    const auth = await requireAuth();
+    if (auth.errorResponse) return auth.errorResponse;
+    try {
+        const body = await request.json();
+        const parsed = renderLabelsZplSchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json(
+                {
+                    error: {
+                        code: "VALIDATION_ERROR",
+                        message: "Invalid input",
+                        fields: parsed.error.flatten().fieldErrors,
+                    },
+                },
+                { status: 400 },
+            );
+        }
+        const useCase = container.get<IRenderLabelsZplUseCase>(SYMBOLS.RenderLabelsZplUseCase);
+        const result = await useCase.execute(parsed.data);
+        return NextResponse.json(result, { status: 200 });
+    } catch (error) {
+        return toHttpResponse(error);
+    }
+}

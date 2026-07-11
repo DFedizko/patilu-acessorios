@@ -101,6 +101,26 @@ export const updateTierSchema = z.object({
 
 export type UpdateTierDTO = z.input<typeof updateTierSchema>;
 
+export const renderLabelsZplSchema = z.object({
+    items: z
+        .array(
+            z.object({
+                tierId: z.string().min(1, "Informe a faixa"),
+                quantity: z.number().int().min(1, "Quantidade deve ser ao menos 1"),
+            }),
+        )
+        .min(1, "Selecione ao menos uma faixa"),
+    options: z.object({
+        heightDots: z.number().int().min(10, "Altura inválida").max(600, "Altura inválida"),
+        moduleWidthDots: z.number().int().min(1, "Largura de módulo inválida").max(10, "Largura de módulo inválida"),
+        originXDots: z.number().int().min(0, "Posição inválida").max(2000, "Posição inválida"),
+        originYDots: z.number().int().min(0, "Posição inválida").max(2000, "Posição inválida"),
+        printHumanReadable: z.boolean(),
+    }),
+});
+
+export type RenderLabelsZplDTO = z.input<typeof renderLabelsZplSchema>;
+
 export type OrderListItem = {
     orderId: string;
     orderNumber: string;
@@ -138,6 +158,26 @@ export const setManualAdSpendSchema = z.object({
 
 export type SetManualAdSpendDTO = z.input<typeof setManualAdSpendSchema>;
 
+export const TIKTOK_WEBHOOK_EVENT = {
+    ORDER_STATUS_UPDATE: 1,
+    REVERSE_ORDER_STATUS_UPDATE: 2,
+    RECIPIENT_ADDRESS_UPDATE: 3,
+    PACKAGE_UPDATE: 4,
+    PRODUCT_STATUS_UPDATE: 5,
+    SELLER_DEAUTHORIZATION: 6,
+    UPCOMING_AUTHORIZATION_EXPIRATION: 7,
+    RETURN_STATUS_UPDATE: 12,
+} as const;
+
+export const tiktokWebhookEventSchema = z.object({
+    type: z.number().int(),
+    shop_id: z.string().optional(),
+    timestamp: z.number().int().optional(),
+    data: z.record(z.string(), z.unknown()),
+});
+
+export type TikTokWebhookEventDTO = z.infer<typeof tiktokWebhookEventSchema>;
+
 export type HistoryRow = {
     orderId: string;
     orderNumber: string;
@@ -150,6 +190,12 @@ export type HistoryRow = {
     fixedCostCents: number;
     netMarginCents: number | null;
     netMarginPct: number | null;
+    saleBrl: string;
+    itemsCostBrl: string | null;
+    cpaBrl: string;
+    taxBrl: string;
+    fixedCostBrl: string;
+    netMarginBrl: string | null;
 };
 
 export type HistorySummary = {
@@ -171,7 +217,7 @@ export type DashboardData = {
     profitCents: number;
     avgMarginPct: number;
     orderCount: number;
-    marginSeries: { label: string; marginPct: number }[];
+    salesSeries: { at: string; saleCents: number; costCents: number }[];
     costByCategory: { categoryName: string; costCents: number }[];
     adsAvailable: boolean;
 };

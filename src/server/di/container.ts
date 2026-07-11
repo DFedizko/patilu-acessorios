@@ -40,12 +40,13 @@ import type { IOrderListPersistenceGateway } from "@/server/application/gateway/
 import type { ITikTokOrdersGateway } from "@/server/application/gateway/ITikTokOrdersGateway";
 import type { ITikTokAdsGateway } from "@/server/application/gateway/ITikTokAdsGateway";
 import type { IIngestTikTokOrderUseCase } from "@/server/application/use-case/contracts/IIngestTikTokOrderUseCase";
+import type { IIngestTikTokOrderByIdUseCase } from "@/server/application/use-case/contracts/IIngestTikTokOrderByIdUseCase";
 import type { IListOrdersUseCase } from "@/server/application/use-case/contracts/IListOrdersUseCase";
 import { OrderPrismaRepository } from "@/server/infrastructure/repository/OrderPrismaRepository";
 import { OrderListPrismaPersistenceGateway } from "@/server/infrastructure/gateway/OrderListPrismaPersistenceGateway";
 import { TikTokOrderTranslator } from "@/server/domain/acl/TikTokOrderTranslator";
-import { TikTokAdsTranslator } from "@/server/domain/acl/TikTokAdsTranslator";
 import { IngestTikTokOrderUseCase } from "@/server/application/use-case/IngestTikTokOrderUseCase";
+import { IngestTikTokOrderByIdUseCase } from "@/server/application/use-case/IngestTikTokOrderByIdUseCase";
 import { ListOrdersUseCase } from "@/server/application/use-case/ListOrdersUseCase";
 import type { IPackingRepository } from "@/server/domain/repository/IPackingRepository";
 import type { IGetOrderForPackingUseCase } from "@/server/application/use-case/contracts/IGetOrderForPackingUseCase";
@@ -74,6 +75,10 @@ import type { IBarcodeRenderer } from "@/server/application/gateway/IBarcodeRend
 import type { IRenderTierLabelUseCase } from "@/server/application/use-case/contracts/IRenderTierLabelUseCase";
 import { Code128BarcodeRenderer } from "@/server/infrastructure/gateway/Code128BarcodeRenderer";
 import { RenderTierLabelUseCase } from "@/server/application/use-case/RenderTierLabelUseCase";
+import type { IZplLabelRenderer } from "@/server/application/gateway/IZplLabelRenderer";
+import type { IRenderLabelsZplUseCase } from "@/server/application/use-case/contracts/IRenderLabelsZplUseCase";
+import { ZplLabelRenderer } from "@/server/infrastructure/gateway/ZplLabelRenderer";
+import { RenderLabelsZplUseCase } from "@/server/application/use-case/RenderLabelsZplUseCase";
 import type { IReportPersistenceGateway } from "@/server/application/gateway/IReportPersistenceGateway";
 import type { IGetHistoryUseCase } from "@/server/application/use-case/contracts/IGetHistoryUseCase";
 import type { IExportHistoryUseCase } from "@/server/application/use-case/contracts/IExportHistoryUseCase";
@@ -120,7 +125,6 @@ const isTikTokOrdersConfigured = Boolean(
 );
 const isTikTokAdsConfigured = Boolean(process.env.TIKTOK_ADS_ACCESS_TOKEN && process.env.TIKTOK_ADS_ADVERTISER_ID);
 container.bind<TikTokOrderTranslator>(SYMBOLS.TikTokOrderTranslator).toConstantValue(new TikTokOrderTranslator());
-container.bind<TikTokAdsTranslator>(SYMBOLS.TikTokAdsTranslator).toConstantValue(new TikTokAdsTranslator());
 container.bind<TikTokWebhookVerifier>(SYMBOLS.TikTokWebhookVerifier).toConstantValue(new TikTokWebhookVerifier());
 container.bind<TikTokOrdersHttpGateway>(TikTokOrdersHttpGateway).toSelf();
 container.bind<TikTokAdsHttpGateway>(TikTokAdsHttpGateway).toSelf();
@@ -145,6 +149,7 @@ container
             ),
     );
 container.bind<IIngestTikTokOrderUseCase>(SYMBOLS.IngestTikTokOrderUseCase).to(IngestTikTokOrderUseCase);
+container.bind<IIngestTikTokOrderByIdUseCase>(SYMBOLS.IngestTikTokOrderByIdUseCase).to(IngestTikTokOrderByIdUseCase);
 container.bind<IListOrdersUseCase>(SYMBOLS.ListOrdersUseCase).to(ListOrdersUseCase);
 
 container.bind<IPackingRepository>(SYMBOLS.PackingRepository).to(PackingPrismaRepository);
@@ -154,6 +159,8 @@ container.bind<IDeletePackingUseCase>(SYMBOLS.DeletePackingUseCase).to(DeletePac
 
 container.bind<IBarcodeRenderer>(SYMBOLS.BarcodeRenderer).to(Code128BarcodeRenderer);
 container.bind<IRenderTierLabelUseCase>(SYMBOLS.RenderTierLabelUseCase).to(RenderTierLabelUseCase);
+container.bind<IZplLabelRenderer>(SYMBOLS.ZplLabelRenderer).to(ZplLabelRenderer);
+container.bind<IRenderLabelsZplUseCase>(SYMBOLS.RenderLabelsZplUseCase).to(RenderLabelsZplUseCase);
 
 container.bind<PeriodReportCalculator>(SYMBOLS.PeriodReportCalculator).toConstantValue(new PeriodReportCalculator());
 container.bind<IAdSpendPersistenceGateway>(SYMBOLS.AdSpendPersistenceGateway).to(AdSpendPrismaPersistenceGateway);

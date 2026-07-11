@@ -40,13 +40,15 @@ type TikTokOrdersSearchResponse = {
 
 @injectable()
 export class TikTokOrdersHttpGateway extends TikTokHttpGateway implements ITikTokOrdersGateway {
-    private accessToken: string;
-    private accessTokenExpiresAt: number;
+    private APP_KEY = process.env.TIKTOK_SHOP_APP_KEY;
+    private APP_SECRET = process.env.TIKTOK_SHOP_APP_SECRET;
+    private CIPHER = process.env.TIKTOK_SHOP_CIPHER;
+    private REFRESH_TOKEN = process.env.TIKTOK_SHOP_REFRESH_TOKEN;
+    private ACCESS_TOKEN: string = process.env.TIKTOK_SHOP_ACCESS_TOKEN ?? "";
+    private ACCESS_TOKEN_EXPIRES_AT: number = Number(process.env.TIKTOK_SHOP_ACCESS_TOKEN_EXPIRES_AT ?? 0);
 
     constructor(@inject(SYMBOLS.HttpClient) http: HttpClient) {
         super(http);
-        this.accessToken = process.env.TIKTOK_SHOP_ACCESS_TOKEN ?? "";
-        this.accessTokenExpiresAt = Number(process.env.TIKTOK_SHOP_ACCESS_TOKEN_EXPIRES_AT ?? 0);
     }
 
     async searchOrders(period: Period): Promise<TikTokOrderDTO[]> {
@@ -98,42 +100,36 @@ export class TikTokOrdersHttpGateway extends TikTokHttpGateway implements ITikTo
     }
 
     private async signedShopParams(path: string, extra: HttpParams, body?: string): Promise<HttpParams> {
-        const appKey = this.requireEnv("TIKTOK_SHOP_APP_KEY");
-        const appSecret = this.requireEnv("TIKTOK_SHOP_APP_SECRET");
-        const shopCipher = this.requireEnv("TIKTOK_SHOP_CIPHER");
         const params: HttpParams = {
-            app_key: appKey,
+            app_key: this.APP_KEY,
             timestamp: this.nowInSeconds(),
-            shop_cipher: shopCipher,
+            shop_cipher: this.CIPHER,
             ...extra,
         };
-        params.sign = this.sign(appSecret, path, params, body);
+        params.sign = this.sign(this.APP_SECRET, path, params, body);
         return params;
     }
 
     private async getAccessToken(): Promise<string> {
-        if (this.accessToken && this.accessTokenExpiresAt > this.nowInSeconds() + TOKEN_EXPIRY_SKEW_SECONDS) {
-            return this.accessToken;
+        if (this.ACCESS_TOKEN && this.ACCESS_TOKEN_EXPIRES_AT > this.nowInSeconds() + TOKEN_EXPIRY_SKEW_SECONDS) {
+            return this.ACCESS_TOKEN;
         }
         return this.refreshAccessToken();
     }
 
     private async refreshAccessToken(): Promise<string> {
-        const appKey = this.requireEnv("TIKTOK_SHOP_APP_KEY");
-        const appSecret = this.requireEnv("TIKTOK_SHOP_APP_SECRET");
-        const refreshToken = this.requireEnv("TIKTOK_SHOP_REFRESH_TOKEN");
         const response = await this.http.get<TikTokTokenResponse>(`${AUTH_HOST}/api/v2/token/refresh`, {
             params: {
-                app_key: appKey,
-                app_secret: appSecret,
-                refresh_token: refreshToken,
+                app_key: this.APP_KEY,
+                app_secret: this.APP_SECRET,
+                refresh_token: this.REFRESH_TOKEN,
                 grant_type: "refresh_token",
             },
         });
         const token = response.data?.access_token;
         if (!token) throw new TikTokApiError("TikTok token refresh returned no access_token");
-        this.accessToken = token;
-        this.accessTokenExpiresAt = response.data?.access_token_expire_in ?? 0;
+        this.ACCESS_TOKEN = token;
+        this.ACCESS_TOKEN_EXPIRES_AT = response.data?.access_token_expire_in ?? 0;
         return token;
     }
 

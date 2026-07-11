@@ -26,9 +26,9 @@ export class CategoryPrismaRepository implements ICategoryRepository {
 
     async save(category: Category): Promise<void> {
         await this.prisma.category.upsert({
-            where: { id: category.id },
+            where: { id: category.id.value },
             create: {
-                id: category.id,
+                id: category.id.value,
                 name: category.getName(),
                 createdAt: category.getCreatedAt(),
             },

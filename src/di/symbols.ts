@@ -7,4 +7,5 @@ export const FRONT_SYMBOLS = {
     PackingService: Symbol.for("FrontPackingService"),
     ReportService: Symbol.for("FrontReportService"),
     AdSpendService: Symbol.for("FrontAdSpendService"),
+    LabelService: Symbol.for("FrontLabelService"),
 } as const;

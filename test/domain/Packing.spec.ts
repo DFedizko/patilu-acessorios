@@ -11,7 +11,7 @@ const makeTierSnapshot = (overrides: Partial<Parameters<Packing["addTier"]>[0]> 
     tierId: "tier-1",
     tierName: "Caneta R$1",
     categoryName: "Canetas",
-    unitCostCents: 100,
+    unitCostAmount: Money.fromCents(100),
     ...overrides,
 });
 
@@ -105,13 +105,13 @@ describe("Packing", () => {
 
             expect(packing.getLooseItems()).toHaveLength(1);
             expect(packing.getLooseItems()[0].getName()).toBe("Fita adesiva");
-            expect(packing.getLooseItems()[0].getCostCents()).toBe(250);
+            expect(packing.getLooseItems()[0].getCost().toCents()).toBe(250);
         });
 
         it("removes a loose item by id", () => {
             const packing = makePacking();
             packing.addLooseItem("Fita adesiva", Money.fromReais(2.5));
-            const looseItemId = packing.getLooseItems()[0].id;
+            const looseItemId = packing.getLooseItems()[0].id.value;
 
             packing.removeLooseItem(looseItemId);
 
@@ -137,16 +137,16 @@ describe("Packing", () => {
 
         it("sums tier items cost", () => {
             const packing = makePacking();
-            packing.addTier(makeTierSnapshot({ tierId: "tier-1", unitCostCents: 100 }));
+            packing.addTier(makeTierSnapshot({ tierId: "tier-1", unitCostAmount: Money.fromCents(100) }));
             packing.addTier(makeTierSnapshot({ tierId: "tier-1" }));
-            packing.addTier(makeTierSnapshot({ tierId: "tier-2", unitCostCents: 800 }));
+            packing.addTier(makeTierSnapshot({ tierId: "tier-2", unitCostAmount: Money.fromCents(800) }));
 
             expect(packing.computeItemsCost().toCents()).toBe(1000);
         });
 
         it("includes loose items in the cost sum", () => {
             const packing = makePacking();
-            packing.addTier(makeTierSnapshot({ unitCostCents: 100 }));
+            packing.addTier(makeTierSnapshot({ unitCostAmount: Money.fromCents(100) }));
             packing.addLooseItem("Extra", Money.fromReais(1.5));
 
             expect(packing.computeItemsCost().toCents()).toBe(250);
@@ -156,7 +156,7 @@ describe("Packing", () => {
     describe("computeLiveMargin()", () => {
         it("computes correct margin value and percentage", () => {
             const packing = makePacking();
-            packing.addTier(makeTierSnapshot({ unitCostCents: 500 }));
+            packing.addTier(makeTierSnapshot({ unitCostAmount: Money.fromCents(500) }));
             const sale = Money.fromReais(20);
             const shipping = Money.fromReais(5);
 
@@ -168,7 +168,7 @@ describe("Packing", () => {
 
         it("returns negative margin when cost exceeds sale minus shipping", () => {
             const packing = makePacking();
-            packing.addTier(makeTierSnapshot({ unitCostCents: 2000 }));
+            packing.addTier(makeTierSnapshot({ unitCostAmount: Money.fromCents(2000) }));
             const sale = Money.fromReais(10);
             const shipping = Money.fromReais(5);
 
@@ -203,23 +203,23 @@ describe("Packing", () => {
     describe("restore()", () => {
         it("restores a packing with items and loose items", () => {
             const item = PackingItem.restore({
-                id: "item-1",
+                id: "00000000-0000-4000-8000-000000000002",
                 packingId: "packing-1",
                 tierId: "tier-1",
                 tierName: "Caneta",
                 categoryName: "Canetas",
-                unitCostCents: 100,
+                unitCostAmount: Money.fromCents(100),
                 quantity: 2,
             });
             const looseItem = LooseItem.restore({
-                id: "loose-1",
+                id: "00000000-0000-4000-8000-000000000003",
                 packingId: "packing-1",
                 name: "Fita",
-                costCents: 200,
+                costAmount: Money.fromCents(200),
             });
 
             const packing = Packing.restore({
-                id: "packing-1",
+                id: "00000000-0000-4000-8000-000000000004",
                 orderId: "order-1",
                 operatorId: "op-1",
                 packedAt: new Date("2025-01-01"),
@@ -228,7 +228,7 @@ describe("Packing", () => {
                 looseItems: [looseItem],
             });
 
-            expect(packing.getId()).toBe("packing-1");
+            expect(packing.id.value).toBe("00000000-0000-4000-8000-000000000004");
             expect(packing.getItems()).toHaveLength(1);
             expect(packing.getLooseItems()).toHaveLength(1);
             expect(packing.computeItemsCost().toCents()).toBe(400);

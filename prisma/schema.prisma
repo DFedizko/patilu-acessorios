@@ -9,7 +9,7 @@ datasource db {
 }
 
 model Category {
-    id        String   @id @default(cuid())
+    id        String   @id @default(uuid()) @db.Uuid
     name      String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -19,11 +19,11 @@ model Category {
 }
 
 model Tier {
-    id         String    @id @default(cuid())
+    id         String    @id @default(uuid()) @db.Uuid
     name       String
     costCents  Int
     barcode    String    @unique
-    categoryId String?
+    categoryId String?   @db.Uuid
     category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
@@ -44,7 +44,7 @@ enum PackingStatus {
 }
 
 model Order {
-    id             String         @id @default(cuid())
+    id             String         @id @default(uuid()) @db.Uuid
     tiktokOrderId  String         @unique
     orderNumber    String
     recipientName  String?
@@ -63,8 +63,8 @@ model Order {
 }
 
 model Packing {
-    id         String        @id @default(cuid())
-    orderId    String        @unique
+    id         String        @id @default(uuid()) @db.Uuid
+    orderId    String        @unique @db.Uuid
     order      Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
     operatorId String
     packedAt   DateTime      @default(now())
@@ -76,10 +76,10 @@ model Packing {
 }
 
 model PackingItem {
-    id            String  @id @default(cuid())
-    packingId     String
+    id            String  @id @default(uuid()) @db.Uuid
+    packingId     String  @db.Uuid
     packing       Packing @relation(fields: [packingId], references: [id], onDelete: Cascade)
-    tierId        String?
+    tierId        String? @db.Uuid
     tierName      String
     categoryName  String
     unitCostCents Int
@@ -90,8 +90,8 @@ model PackingItem {
 }
 
 model LooseItem {
-    id        String  @id @default(cuid())
-    packingId String
+    id        String  @id @default(uuid()) @db.Uuid
+    packingId String  @db.Uuid
     packing   Packing @relation(fields: [packingId], references: [id], onDelete: Cascade)
     name      String
     costCents Int

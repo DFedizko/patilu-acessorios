@@ -33,7 +33,7 @@ export class CreateTierUseCase implements ICreateTierUseCase {
             const tier = Tier.create({ name: input.name, cost, barcode, categoryId: input.categoryId ?? null });
             try {
                 await this.tierRepo.save(tier);
-                return toOutput(tier);
+                return this.toOutput(tier);
             } catch (error) {
                 if (
                     error instanceof DomainError &&
@@ -47,12 +47,14 @@ export class CreateTierUseCase implements ICreateTierUseCase {
         }
         throw new DomainError("DUPLICATE_BARCODE", 422, "Could not generate a unique barcode after retries");
     }
-}
 
-const toOutput = (tier: Tier): Output => ({
-    id: tier.getId(),
-    name: tier.getName(),
-    costCents: tier.getCost().toCents(),
-    barcode: tier.getBarcode().toString(),
-    categoryId: tier.getCategoryId(),
-});
+    private toOutput(tier: Tier): Output {
+        return {
+            id: tier.id.value,
+            name: tier.getName(),
+            costCents: tier.getCost().toCents(),
+            barcode: tier.getBarcode().toString(),
+            categoryId: tier.getCategoryId(),
+        };
+    }
+}

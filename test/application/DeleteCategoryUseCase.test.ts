@@ -42,7 +42,7 @@ describe("DeleteCategoryUseCase", () => {
 
         // Act
         try {
-            await deleteCategory.execute({ id: "non-existent-id" });
+            await deleteCategory.execute({ id: "00000000-0000-4000-8000-000000000000" });
         } catch (error) {
             thrown = error;
         }

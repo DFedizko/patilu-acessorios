@@ -9,6 +9,7 @@ import {
     updateTierSchema,
     savePackingSchema,
     setManualAdSpendSchema,
+    renderLabelsZplSchema,
 } from "@/lib/schemas";
 
 const fixedCostsResponseSchema = z.object({
@@ -65,6 +66,10 @@ const validationErrorSchema = z.object({
         message: z.string(),
         fields: z.record(z.string(), z.array(z.string())).optional(),
     }),
+});
+
+const zplResponseSchema = z.object({
+    zpl: z.string(),
 });
 
 export function getOpenApiDocument() {
@@ -288,6 +293,37 @@ export function getOpenApiDocument() {
                     },
                 },
             },
+            "/api/labels/zpl": {
+                post: {
+                    operationId: "renderLabelsZpl",
+                    summary: "Gera o ZPL (Zebra) das etiquetas das faixas selecionadas",
+                    description:
+                        "Recebe faixas (por id) com quantidade e opções de layout (altura, largura de módulo, posição, texto legível) e retorna o ZPL pronto para o driver da Zebra — um bloco ^XA…^XZ por faixa com ^PQ = quantidade.",
+                    tags: ["Labels"],
+                    requestBody: {
+                        required: true,
+                        content: { "application/json": { schema: renderLabelsZplSchema } },
+                    },
+                    responses: {
+                        "200": {
+                            description: "ZPL gerado",
+                            content: { "application/json": { schema: zplResponseSchema } },
+                        },
+                        "400": {
+                            description: "Dados inválidos",
+                            content: { "application/json": { schema: validationErrorSchema } },
+                        },
+                        "401": {
+                            description: "Não autenticado",
+                            content: { "application/json": { schema: notFoundErrorSchema } },
+                        },
+                        "404": {
+                            description: "Faixa não encontrada",
+                            content: { "application/json": { schema: notFoundErrorSchema } },
+                        },
+                    },
+                },
+            },
             "/api/orders": {
                 get: {
                     operationId: "listOrders",
@@ -461,37 +497,39 @@ export function getOpenApiDocument() {
             "/api/webhooks/tiktok/orders": {
                 post: {
                     operationId: "tiktokOrderWebhook",
-                    summary: "Recebe atualização de status de pedido do TikTok (stub — HMAC em RF-20)",
+                    summary:
+                        "Recebe notificações do TikTok Shop (envelope de evento, assinatura HMAC no header Authorization)",
+                    description:
+                        "Corpo é o envelope de evento do TikTok Shop (202309+). Para type=1 (ORDER_STATUS_UPDATE), data.order_id é usado para buscar o pedido completo via API e materializá-lo/atualizá-lo.",
                     tags: ["Webhooks"],
                     requestBody: {
                         required: true,
                         content: {
                             "application/json": {
                                 schema: z.object({
-                                    tiktokOrderId: z.string().describe("ID único do pedido no TikTok"),
-                                    orderNumber: z.string().describe("Número do pedido exibido ao cliente"),
-                                    recipientName: z.string().nullable().describe("@handle do cliente"),
-                                    totalAmountCents: z.number().int().describe("Valor total da venda em centavos"),
-                                    shippingFeeCents: z.number().int().describe("Frete em centavos"),
-                                    createTime: z.string().describe("ISO 8601 — data/hora do pedido"),
-                                    orderStatus: z
-                                        .enum([
-                                            "UNPAID",
-                                            "AWAITING_SHIPMENT",
-                                            "AWAITING_COLLECTION",
-                                            "PARTIALLY_SHIPPING",
-                                            "IN_TRANSIT",
-                                            "DELIVERED",
-                                            "COMPLETED",
-                                            "CANCELLED",
-                                        ])
-                                        .describe("Status do pedido no TikTok"),
+                                    type: z
+                                        .number()
+                                        .int()
+                                        .describe("Código do evento (1 = ORDER_STATUS_UPDATE, 2, 3, 4, 5, 6, 7, 12)"),
+                                    shop_id: z.string().optional().describe("ID da loja no TikTok"),
+                                    timestamp: z.number().int().optional().describe("Unix timestamp do evento"),
+                                    data: z
+                                        .object({ order_id: z.string().describe("ID do pedido no TikTok") })
+                                        .describe("Payload do evento (para pedidos, contém order_id)"),
                                 }),
                             },
                         },
                     },
                     responses: {
                         "200": { description: "Evento processado" },
+                        "400": {
+                            description: "Payload inválido",
+                            content: { "application/json": { schema: validationErrorSchema } },
+                        },
+                        "401": {
+                            description: "Assinatura inválida",
+                            content: { "application/json": { schema: notFoundErrorSchema } },
+                        },
                     },
                 },
             },
@@ -590,6 +628,12 @@ export function getOpenApiDocument() {
                                                 fixedCostCents: z.number().int(),
                                                 netMarginCents: z.number().int().nullable(),
                                                 netMarginPct: z.number().nullable(),
+                                                saleBrl: z.string(),
+                                                itemsCostBrl: z.string().nullable(),
+                                                cpaBrl: z.string(),
+                                                taxBrl: z.string(),
+                                                fixedCostBrl: z.string(),
+                                                netMarginBrl: z.string().nullable(),
                                             }),
                                         ),
                                         summary: z.object({
@@ -676,7 +720,9 @@ export function getOpenApiDocument() {
                                         profitCents: z.number().int(),
                                         avgMarginPct: z.number(),
                                         orderCount: z.number().int(),
-                                        marginSeries: z.array(z.object({ label: z.string(), marginPct: z.number() })),
+                                        salesSeries: z.array(
+                                            z.object({ at: z.string(), saleCents: z.number(), costCents: z.number() }),
+                                        ),
                                         costByCategory: z.array(
                                             z.object({
                                                 categoryName: z.string(),

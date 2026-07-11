@@ -55,7 +55,7 @@ describe("GetDashboardUseCase", () => {
         expect(result.revenueCents).toBe(0);
         expect(result.costCents).toBe(0);
         expect(result.profitCents).toBe(0);
-        expect(result.marginSeries).toHaveLength(0);
+        expect(result.salesSeries).toHaveLength(0);
         expect(result.costByCategory).toHaveLength(0);
     });
 
@@ -86,8 +86,10 @@ describe("GetDashboardUseCase", () => {
 
     it("groups costByCategory by frozen category name, excludes loose items from buckets but counts them in total cost", async () => {
         // Arrange — two distinct named categories, each with its own tier
-        const pensCategory = await testPrisma.category.create({ data: { name: "Canetas" } });
-        const notebooksCategory = await testPrisma.category.create({ data: { name: "Cadernos" } });
+        const pensCategory = await testPrisma.category.create({ data: { id: crypto.randomUUID(), name: "Canetas" } });
+        const notebooksCategory = await testPrisma.category.create({
+            data: { id: crypto.randomUUID(), name: "Cadernos" },
+        });
         const penTier = await givenTier({ costCents: 200, categoryId: pensCategory.id });
         const notebookTier = await givenTier({ costCents: 500, categoryId: notebooksCategory.id });
         const order1 = await givenOrder({ saleCents: 3000, shippingCents: 0, orderedAt: daysAgo(1) });
@@ -121,7 +123,7 @@ describe("GetDashboardUseCase", () => {
         expect(result.costCents).toBe(1900);
     });
 
-    it("returns marginSeries with day granularity for non-today periods", async () => {
+    it("returns salesSeries with one point per order carrying sale and cost cents at its timestamp", async () => {
         // Arrange
         const tier = await givenTier({ costCents: 100 });
         const order = await givenOrder({ saleCents: 2000, shippingCents: 0, orderedAt: daysAgo(1) });
@@ -136,38 +138,10 @@ describe("GetDashboardUseCase", () => {
         const result = await getDashboard.execute({ period: "week" });
 
         // Assert
-        expect(result.marginSeries.length).toBeGreaterThan(0);
-        const label = result.marginSeries[0]!.label;
-        expect(label).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    });
-
-    it("returns marginSeries with hour granularity for today period", async () => {
-        // Arrange
-        const spFormatter = new Intl.DateTimeFormat("en-CA", {
-            timeZone: "America/Sao_Paulo",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-        });
-        const spTodayStr = spFormatter.format(new Date());
-        const [y, m, d] = spTodayStr.split("-").map(Number);
-        const spTodayNoonUtc = new Date(Date.UTC(y!, m! - 1, d!, 15, 0, 0));
-        const tier = await givenTier({ costCents: 100 });
-        const order = await givenOrder({ saleCents: 2000, shippingCents: 0, orderedAt: spTodayNoonUtc });
-        await savePacking.execute({
-            orderId: order.id,
-            operatorId: "op-1",
-            items: [{ tierId: tier.id, quantity: 1 }],
-            looseItems: [],
-        });
-
-        // Act
-        const result = await getDashboard.execute({ period: "today" });
-
-        // Assert
-        expect(result.marginSeries.length).toBeGreaterThan(0);
-        const label = result.marginSeries[0]!.label;
-        expect(label).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}h$/);
+        expect(result.salesSeries).toHaveLength(1);
+        expect(result.salesSeries[0]!.saleCents).toBe(2000);
+        expect(result.salesSeries[0]!.costCents).toBe(100);
+        expect(result.salesSeries[0]!.at).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     });
 
     it("reflects adsAvailable from ad spend use case", async () => {

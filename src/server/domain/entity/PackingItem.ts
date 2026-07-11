@@ -1,10 +1,12 @@
 import { Money } from "@/server/domain/value-object/Money";
+import { UUID } from "@/server/domain/value-object/UUID";
+import { Entity } from "./Entity";
 
 type CreateProps = {
     tierId?: string;
     tierName: string;
     categoryName: string;
-    unitCostCents: number;
+    unitCostAmount: Money;
 };
 
 type RestoreProps = {
@@ -13,84 +15,87 @@ type RestoreProps = {
     tierId?: string;
     tierName: string;
     categoryName: string;
-    unitCostCents: number;
+    unitCostAmount: Money;
     quantity: number;
 };
 
-export class PackingItem {
+type PackingItemProps = {
+    packingId: string;
+    tierId: string | undefined;
+    tierName: string;
+    categoryName: string;
+    unitCostAmount: Money;
+    quantity: number;
+};
+
+export class PackingItem extends Entity<PackingItemProps, UUID> {
     private constructor(
-        private readonly id: string,
-        private readonly packingId: string,
-        private readonly tierId: string | undefined,
-        private readonly tierName: string,
-        private readonly categoryName: string,
-        private readonly unitCostCents: number,
-        private quantity: number,
-    ) {}
+        protected readonly props: PackingItemProps,
+        id?: UUID,
+    ) {
+        super(props, id);
+    }
 
     static create(props: CreateProps): PackingItem {
-        return new PackingItem(
-            crypto.randomUUID(),
-            "",
-            props.tierId,
-            props.tierName,
-            props.categoryName,
-            props.unitCostCents,
-            1,
-        );
+        return new PackingItem({
+            packingId: "",
+            tierId: props.tierId,
+            tierName: props.tierName,
+            categoryName: props.categoryName,
+            unitCostAmount: props.unitCostAmount,
+            quantity: 1,
+        });
     }
 
     static restore(props: RestoreProps): PackingItem {
         return new PackingItem(
-            props.id,
-            props.packingId,
-            props.tierId,
-            props.tierName,
-            props.categoryName,
-            props.unitCostCents,
-            props.quantity,
+            {
+                packingId: props.packingId,
+                tierId: props.tierId,
+                tierName: props.tierName,
+                categoryName: props.categoryName,
+                unitCostAmount: props.unitCostAmount,
+                quantity: props.quantity,
+            },
+            UUID.restore(props.id),
         );
     }
 
     increment(): number {
-        this.quantity += 1;
-        return this.quantity;
+        this.props.quantity += 1;
+        return this.props.quantity;
     }
 
     decrement(): number {
-        this.quantity -= 1;
-        return this.quantity;
+        this.props.quantity -= 1;
+        return this.props.quantity;
     }
 
     getTotalCost(): Money {
-        return Money.fromCents(this.unitCostCents).multiplyByQuantity(this.quantity);
-    }
-
-    getId(): string {
-        return this.id;
+        return this.props.unitCostAmount.multiplyByQuantity(this.props.quantity);
     }
 
     getPackingId(): string {
-        return this.packingId;
+        return this.props.packingId;
     }
 
     getTierId(): string | undefined {
-        return this.tierId;
+        return this.props.tierId;
     }
 
     getTierName(): string {
-        return this.tierName;
+        return this.props.tierName;
     }
 
     getCategoryName(): string {
-        return this.categoryName;
+        return this.props.categoryName;
     }
 
-    getUnitCostCents(): number {
-        return this.unitCostCents;
+    getUnitCost(): Money {
+        return this.props.unitCostAmount;
     }
 
     getQuantity(): number {
-        return this.quantity;
+        return this.props.quantity;
     }
 }

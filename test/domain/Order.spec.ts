@@ -1,15 +1,16 @@
 import { describe, expect, it } from "bun:test";
 import { Order } from "@/server/domain/entity/Order";
+import { Money } from "@/server/domain/value-object/Money";
 import { OrderCannotBePackedError } from "@/server/domain/error/OrderCannotBePackedError";
 
 const makeOrder = (overrides: Partial<Parameters<typeof Order.restore>[0]> = {}) =>
     Order.restore({
-        id: "order-1",
+        id: "00000000-0000-4000-8000-000000000001",
         tiktokOrderId: "TT-001",
         orderNumber: "ORD-001",
         recipientName: "Maria S.",
-        saleCents: 5000,
-        shippingCents: 1500,
+        saleAmount: Money.fromCents(5000),
+        shippingAmount: Money.fromCents(1500),
         orderedAt: new Date("2025-01-01T12:00:00Z"),
         shipmentStatus: "PENDING",
         packingStatus: "NOT_PACKED",
@@ -72,7 +73,7 @@ describe("Order", () => {
 
     describe("getSale() / getShipping()", () => {
         it("returns sale and shipping as Money", () => {
-            const order = makeOrder({ saleCents: 4500, shippingCents: 1200 });
+            const order = makeOrder({ saleAmount: Money.fromCents(4500), shippingAmount: Money.fromCents(1200) });
 
             expect(order.getSale().toCents()).toBe(4500);
             expect(order.getShipping().toCents()).toBe(1200);

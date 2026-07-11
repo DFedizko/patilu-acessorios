@@ -19,7 +19,10 @@ export class ReportPrismaPersistenceGateway implements IReportPersistenceGateway
     async listByPeriod(period: Period): Promise<ReportOrder[]> {
         const endExclusive = new Date(period.end.getTime() + ONE_DAY_MS);
         const records = await this.prisma.order.findMany({
-            where: { orderedAt: { gte: period.start, lt: endExclusive } },
+            where: {
+                orderedAt: { gte: period.start, lt: endExclusive },
+                shipmentStatus: { not: "CANCELLED" },
+            },
             include: { packing: { include: { items: true, looseItems: true } } },
             orderBy: { orderedAt: "asc" },
         });

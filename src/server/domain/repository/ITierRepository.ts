@@ -2,6 +2,7 @@ import type { Tier } from "@/server/domain/entity/Tier";
 
 export interface ITierRepository {
     findById(id: string): Promise<Tier>;
+    findByIds(ids: string[]): Promise<Tier[]>;
     findByBarcode(barcode: string): Promise<Tier>;
     findAll(): Promise<Tier[]>;
     findByCategoryId(categoryId: string): Promise<Tier[]>;

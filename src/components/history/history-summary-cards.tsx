@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import type { HistorySummary } from "@/lib/schemas";
 import { formatCurrency, formatPercent } from "@/utils/format";
 import { StatCard } from "@/components/ui/stat-card";
@@ -7,7 +8,6 @@ import { moneyToneClass } from "@/utils/money-tone";
 import { PackageIcon } from "@/components/ui/icons/package-icon";
 import { BanknoteIcon } from "@/components/ui/icons/banknote-icon";
 import { CoinsIcon } from "@/components/ui/icons/coins-icon";
-import { ReceiptIcon } from "@/components/ui/icons/receipt-icon";
 import { MegaphoneIcon } from "@/components/ui/icons/megaphone-icon";
 import { TrendingUpIcon } from "@/components/ui/icons/trending-up-icon";
 import { PercentIcon } from "@/components/ui/icons/percent-icon";
@@ -54,7 +54,15 @@ export const HistorySummaryCards = ({ summary }: HistorySummaryCardsProps) => {
             value: summary.taxCents / 100,
             format: formatCurrency,
             accentClass: "text-ink",
-            icon: <ReceiptIcon />,
+            icon: (
+                <Image
+                    src="/imposto.jpg"
+                    alt="Imposto"
+                    width={48}
+                    height={48}
+                    className="size-7 rounded-md object-cover"
+                />
+            ),
         },
         {
             label: "Ads",

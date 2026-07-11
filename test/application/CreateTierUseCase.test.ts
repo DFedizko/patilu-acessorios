@@ -102,7 +102,11 @@ describe("CreateTierUseCase", () => {
 
         // Act
         try {
-            await createTier.execute({ name: "Caneta", costReais: 1, categoryId: "non-existent-id" });
+            await createTier.execute({
+                name: "Caneta",
+                costReais: 1,
+                categoryId: "00000000-0000-4000-8000-000000000000",
+            });
         } catch (error) {
             thrown = error;
         }

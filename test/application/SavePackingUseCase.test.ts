@@ -39,10 +39,10 @@ describe("SavePackingUseCase", () => {
         });
 
         // Assert
-        expect(packing.getId()).toBeDefined();
+        expect(packing.id).toBeDefined();
         expect(packing.getItems()).toHaveLength(1);
         expect(packing.getItems()[0].getQuantity()).toBe(3);
-        expect(packing.getItems()[0].getUnitCostCents()).toBe(100);
+        expect(packing.getItems()[0].getUnitCost().toCents()).toBe(100);
         const savedOrder = await orderRepo.findById(order.id);
         expect(savedOrder.getPackingStatus()).toBe("PACKED");
         const savedPacking = await testPrisma.packing.findUnique({
@@ -76,7 +76,7 @@ describe("SavePackingUseCase", () => {
     it("freezes the cost snapshot so later tier changes do not affect the packing", async () => {
         // Arrange
         const order = await givenOrder();
-        const category = await testPrisma.category.create({ data: { name: "Canetas" } });
+        const category = await testPrisma.category.create({ data: { id: crypto.randomUUID(), name: "Canetas" } });
         const tier = await givenTier({ name: "Caneta R$1", costCents: 100, categoryId: category.id });
 
         // Act
@@ -92,7 +92,7 @@ describe("SavePackingUseCase", () => {
 
         // Assert
         expect(reloaded).not.toBeNull();
-        expect(reloaded?.getItems()[0].getUnitCostCents()).toBe(100);
+        expect(reloaded?.getItems()[0].getUnitCost().toCents()).toBe(100);
         expect(reloaded?.getItems()[0].getTierName()).toBe("Caneta R$1");
         expect(reloaded?.getItems()[0].getCategoryName()).toBe("Canetas");
     });
@@ -124,7 +124,7 @@ describe("SavePackingUseCase", () => {
         expect(reloaded?.getItems()).toHaveLength(1);
         expect(reloaded?.getItems()[0].getTierId()).toBe(secondTier.id);
         expect(reloaded?.getItems()[0].getQuantity()).toBe(1);
-        expect(reloaded?.getItems()[0].getUnitCostCents()).toBe(800);
+        expect(reloaded?.getItems()[0].getUnitCost().toCents()).toBe(800);
         expect(reloaded?.getLooseItems()).toHaveLength(0);
         const savedPacking = await testPrisma.packing.findUnique({
             where: { orderId: order.id },
@@ -149,7 +149,7 @@ describe("SavePackingUseCase", () => {
         // Assert
         expect(packing.getLooseItems()).toHaveLength(1);
         expect(packing.getLooseItems()[0].getName()).toBe("Fita adesiva");
-        expect(packing.getLooseItems()[0].getCostCents()).toBe(250);
+        expect(packing.getLooseItems()[0].getCost().toCents()).toBe(250);
         const savedPacking = await testPrisma.packing.findUnique({
             where: { orderId: order.id },
             include: { looseItems: true },
@@ -160,7 +160,7 @@ describe("SavePackingUseCase", () => {
     it("sets categoryName from tier category when tier has a category", async () => {
         // Arrange
         const order = await givenOrder();
-        const category = await testPrisma.category.create({ data: { name: "Canetas" } });
+        const category = await testPrisma.category.create({ data: { id: crypto.randomUUID(), name: "Canetas" } });
         const tier = await givenTier({ categoryId: category.id });
 
         // Act
@@ -247,7 +247,7 @@ describe("SavePackingUseCase", () => {
             await savePacking.execute({
                 orderId: order.id,
                 operatorId: "operator-1",
-                items: [{ tierId: "non-existent-tier", quantity: 1 }],
+                items: [{ tierId: "00000000-0000-4000-8000-000000000000", quantity: 1 }],
                 looseItems: [],
             });
         } catch (error) {

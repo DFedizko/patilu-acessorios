@@ -30,7 +30,9 @@ describe("IngestTikTokOrderUseCase", () => {
         const container = new Container();
         container.bind(SYMBOLS.PrismaClient).toConstantValue(testPrisma);
         container.bind<IOrderRepository>(SYMBOLS.OrderRepository).to(OrderPrismaRepository);
-        container.bind<TikTokOrderTranslator>(SYMBOLS.TikTokOrderTranslator).toConstantValue(new TikTokOrderTranslator());
+        container
+            .bind<TikTokOrderTranslator>(SYMBOLS.TikTokOrderTranslator)
+            .toConstantValue(new TikTokOrderTranslator());
         container.bind<IIngestTikTokOrderUseCase>(SYMBOLS.IngestTikTokOrderUseCase).to(IngestTikTokOrderUseCase);
         useCase = container.get<IIngestTikTokOrderUseCase>(SYMBOLS.IngestTikTokOrderUseCase);
     });

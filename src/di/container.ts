@@ -7,6 +7,7 @@ import { createTierService, type TierService } from "@/service/tier-service";
 import { createPackingService, type PackingService } from "@/service/packing-service";
 import { createReportService, type ReportService } from "@/service/report-service";
 import { createAdSpendService, type AdSpendService } from "@/service/ad-spend-service";
+import { createLabelService, type LabelService } from "@/service/label-service";
 import { FRONT_SYMBOLS } from "./symbols";
 
 const registry = new Map<symbol, unknown>();
@@ -20,6 +21,7 @@ registry.set(FRONT_SYMBOLS.TierService, createTierService(httpClient));
 registry.set(FRONT_SYMBOLS.PackingService, createPackingService(httpClient));
 registry.set(FRONT_SYMBOLS.ReportService, createReportService(httpClient));
 registry.set(FRONT_SYMBOLS.AdSpendService, createAdSpendService(httpClient));
+registry.set(FRONT_SYMBOLS.LabelService, createLabelService(httpClient));
 
 export const resolve = <T>(symbol: symbol): T => {
     const dep = registry.get(symbol);
@@ -37,4 +39,5 @@ export const frontContainer = {
     getPackingService: (): PackingService => resolve<PackingService>(FRONT_SYMBOLS.PackingService),
     getReportService: (): ReportService => resolve<ReportService>(FRONT_SYMBOLS.ReportService),
     getAdSpendService: (): AdSpendService => resolve<AdSpendService>(FRONT_SYMBOLS.AdSpendService),
+    getLabelService: (): LabelService => resolve<LabelService>(FRONT_SYMBOLS.LabelService),
 };

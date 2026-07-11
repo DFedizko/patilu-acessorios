@@ -19,7 +19,7 @@ export const GET = async (_request: NextRequest, context: RouteContext): Promise
         const result = await useCase.execute({ orderId: id });
         return NextResponse.json({
             order: {
-                id: result.order.getId(),
+                id: result.order.id.value,
                 orderNumber: result.order.getOrderNumber(),
                 recipientName: result.order.getRecipientName(),
                 saleCents: result.order.getSale().toCents(),
@@ -29,22 +29,22 @@ export const GET = async (_request: NextRequest, context: RouteContext): Promise
             },
             packing: result.packing
                 ? {
-                      id: result.packing.getId(),
+                      id: result.packing.id.value,
                       orderId: result.packing.getOrderId(),
                       operatorId: result.packing.getOperatorId(),
                       packedAt: result.packing.getPackedAt(),
                       items: result.packing.getItems().map((item) => ({
-                          id: item.getId(),
+                          id: item.id.value,
                           tierId: item.getTierId(),
                           tierName: item.getTierName(),
                           categoryName: item.getCategoryName(),
-                          unitCostCents: item.getUnitCostCents(),
+                          unitCostCents: item.getUnitCost().toCents(),
                           quantity: item.getQuantity(),
                       })),
                       looseItems: result.packing.getLooseItems().map((item) => ({
-                          id: item.id,
+                          id: item.id.value,
                           name: item.getName(),
-                          costCents: item.getCostCents(),
+                          costCents: item.getCost().toCents(),
                       })),
                   }
                 : null,
@@ -76,22 +76,22 @@ export const PUT = async (request: NextRequest, context: RouteContext): Promise<
         const useCase = container.get<ISavePackingUseCase>(SYMBOLS.SavePackingUseCase);
         const packing = await useCase.execute({ ...parsed.data, orderId: id, operatorId: auth.userId });
         return NextResponse.json({
-            id: packing.getId(),
+            id: packing.id.value,
             orderId: packing.getOrderId(),
             operatorId: packing.getOperatorId(),
             packedAt: packing.getPackedAt(),
             items: packing.getItems().map((item) => ({
-                id: item.getId(),
+                id: item.id.value,
                 tierId: item.getTierId(),
                 tierName: item.getTierName(),
                 categoryName: item.getCategoryName(),
-                unitCostCents: item.getUnitCostCents(),
+                unitCostCents: item.getUnitCost().toCents(),
                 quantity: item.getQuantity(),
             })),
             looseItems: packing.getLooseItems().map((item) => ({
-                id: item.id,
+                id: item.id.value,
                 name: item.getName(),
-                costCents: item.getCostCents(),
+                costCents: item.getCost().toCents(),
             })),
         });
     } catch (error) {

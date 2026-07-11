@@ -33,12 +33,6 @@ export abstract class TikTokHttpGateway {
         return { "x-tts-access-token": accessToken, "Content-Type": "application/json" };
     }
 
-    protected requireEnv(name: string): string {
-        const value = process.env[name];
-        if (!value) throw new TikTokNotConfiguredError(`Missing required TikTok env var: ${name}`);
-        return value;
-    }
-
     protected async wrapExternal<T>(action: () => Promise<T>): Promise<T> {
         try {
             return await action();

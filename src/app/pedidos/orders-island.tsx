@@ -9,7 +9,7 @@ import { useOrders } from "@/hooks/query/use-orders";
 import { orderPackingKey } from "@/hooks/query/use-order-packing";
 import { CATALOG_KEY } from "@/hooks/query/use-catalog";
 import { usePersistedPeriod } from "@/hooks/use-persisted-period";
-import { dateWithOffset } from "@/utils/date";
+import { dateWithOffset, spansMultipleDays, formatOrderedAt } from "@/utils/date";
 import { formatCurrency } from "@/utils/format";
 import { PeriodTabs } from "@/components/ui/period-tabs";
 import { CustomDateRange } from "@/components/ui/custom-date-range";
@@ -22,10 +22,10 @@ import { InboxIcon } from "@/components/ui/icons/inbox-icon";
 
 const GRID_COLS = "grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr]";
 
-const formatOrderTime = (isoString: string) =>
-    new Date(isoString).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-
 const resolveStatus = (order: OrderListItem) => {
+    if (order.shipmentStatus === "CANCELLED") {
+        return { label: "Cancelado", className: "bg-negative-soft text-negative" };
+    }
     if (order.shipmentStatus === "SHIPPED") {
         return { label: "Enviado", className: "bg-positive-soft text-positive" };
     }
@@ -36,7 +36,7 @@ const resolveStatus = (order: OrderListItem) => {
 };
 
 const resolveActionLabel = (order: OrderListItem) => {
-    if (order.shipmentStatus === "SHIPPED") return null;
+    if (order.shipmentStatus === "SHIPPED" || order.shipmentStatus === "CANCELLED") return null;
     return order.packingStatus === "PACKED" ? "Editar empacotamento" : "Empacotar";
 };
 
@@ -89,6 +89,7 @@ const OrdersTable = ({ orders, isPending, dimmed }: OrdersTableProps) => {
     if (isPending) {
         return <OrdersTableSkeleton />;
     }
+    const multiDay = spansMultipleDays(orders.map((order) => order.orderedAt));
     if (orders.length === 0) {
         return (
             <EmptyState
@@ -102,10 +103,10 @@ const OrdersTable = ({ orders, isPending, dimmed }: OrdersTableProps) => {
         <div className={`transition-opacity duration-150 ${dimmed ? "opacity-60" : ""}`}>
             <DataTable>
                 <DataTableHeader gridCols={GRID_COLS}>
+                    <span className="text-center">Data</span>
                     <span className="text-center">Cliente</span>
                     <span className="text-center">Valor</span>
                     <span className="text-center">Frete</span>
-                    <span className="text-center">Hora</span>
                     <span className="text-center">Status</span>
                     <span className="text-center">Ação</span>
                 </DataTableHeader>
@@ -114,6 +115,9 @@ const OrdersTable = ({ orders, isPending, dimmed }: OrdersTableProps) => {
                     const actionLabel = resolveActionLabel(order);
                     return (
                         <DataTableRow key={order.orderId} gridCols={GRID_COLS}>
+                            <span className="text-center font-mono text-xs text-ink-muted tabular-nums">
+                                {formatOrderedAt(order.orderedAt, multiDay)}
+                            </span>
                             <span className="text-center text-sm font-semibold text-ink">
                                 {order.recipientName ?? order.orderNumber}
                             </span>
@@ -122,9 +126,6 @@ const OrdersTable = ({ orders, isPending, dimmed }: OrdersTableProps) => {
                             </span>
                             <span className="text-center font-mono text-sm text-ink-muted tabular-nums">
                                 {formatCurrency(order.shippingCents / 100)}
-                            </span>
-                            <span className="text-center font-mono text-xs text-ink-muted tabular-nums">
-                                {formatOrderTime(order.orderedAt)}
                             </span>
                             <span className="text-center">
                                 <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${status.className}`}>

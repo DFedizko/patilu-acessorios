@@ -21,7 +21,7 @@ describe("Tier", () => {
             expect(tier.getName()).toBe("Caneta R$1");
             expect(tier.getCost().toCents()).toBe(100);
             expect(tier.getCategoryId()).toBeNull();
-            expect(tier.getId()).toBeTruthy();
+            expect(tier.id).toBeTruthy();
         });
 
         it("throws DomainError TIER_NAME_REQUIRED when name is empty", () => {

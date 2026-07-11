@@ -1,34 +1,35 @@
+import { Money } from "@/server/domain/value-object/Money";
+import { UUID } from "@/server/domain/value-object/UUID";
 import { Entity } from "./Entity";
 
 type CreateProps = {
-    id?: string;
     name: string;
-    costCents: number;
+    costAmount: Money;
 };
 
 type RestoreProps = {
     id: string;
     packingId: string;
     name: string;
-    costCents: number;
+    costAmount: Money;
 };
 
 type LooseItemProps = {
     packingId: string;
     name: string;
-    costCents: number;
+    costAmount: Money;
 };
 
-export class LooseItem extends Entity<LooseItemProps> {
+export class LooseItem extends Entity<LooseItemProps, UUID> {
     private constructor(
         protected readonly props: LooseItemProps,
-        id?: string,
+        id?: UUID,
     ) {
         super(props, id);
     }
 
     static create(props: CreateProps): LooseItem {
-        return new LooseItem({ packingId: "", name: props.name, costCents: props.costCents }, props.id);
+        return new LooseItem({ packingId: "", name: props.name, costAmount: props.costAmount });
     }
 
     static restore(props: RestoreProps): LooseItem {
@@ -36,9 +37,9 @@ export class LooseItem extends Entity<LooseItemProps> {
             {
                 packingId: props.packingId,
                 name: props.name,
-                costCents: props.costCents,
+                costAmount: props.costAmount,
             },
-            props.id,
+            UUID.restore(props.id),
         );
     }
 
@@ -50,7 +51,7 @@ export class LooseItem extends Entity<LooseItemProps> {
         return this.props.name;
     }
 
-    getCostCents(): number {
-        return this.props.costCents;
+    getCost(): Money {
+        return this.props.costAmount;
     }
 }

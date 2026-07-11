@@ -33,13 +33,13 @@ export class SavePackingUseCase implements ISavePackingUseCase {
                 categoryName = category.getName();
             }
             packing.addTier({
-                tierId: tier.getId(),
+                tierId: tier.id.value,
                 tierName: tier.getName(),
                 categoryName,
-                unitCostCents: tier.getCost().toCents(),
+                unitCostAmount: tier.getCost(),
             });
             for (let i = 1; i < item.quantity; i++) {
-                packing.incrementTier(tier.getId());
+                packing.incrementTier(tier.id.value);
             }
         }
         for (const looseItem of input.looseItems) {

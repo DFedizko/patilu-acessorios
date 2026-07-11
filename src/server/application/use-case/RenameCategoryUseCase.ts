@@ -15,6 +15,6 @@ export class RenameCategoryUseCase implements IRenameCategoryUseCase {
         const category = await this.categoryRepo.findById(input.id);
         category.rename(input.name);
         await this.categoryRepo.save(category);
-        return { id: category.id, name: category.getName() };
+        return { id: category.id.value, name: category.getName() };
     }
 }

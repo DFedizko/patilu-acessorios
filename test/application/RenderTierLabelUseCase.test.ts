@@ -41,7 +41,7 @@ describe("RenderTierLabelUseCase", () => {
 
         // Act
         try {
-            await renderLabel.execute({ id: "nonexistent-id" });
+            await renderLabel.execute({ id: "00000000-0000-4000-8000-000000000000" });
         } catch (error) {
             thrown = error;
         }

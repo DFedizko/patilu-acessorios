@@ -11,9 +11,18 @@ export type OrderInPeriod = {
     orderedAt: Date;
 };
 
-const pad = (n: number): string => n.toString().padStart(2, "0");
-
 const TAX_RATE = 0.042;
+
+const SAO_PAULO_TZ = "America/Sao_Paulo";
+
+const SP_DAY_FORMATTER = new Intl.DateTimeFormat("en-CA", {
+    timeZone: SAO_PAULO_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+});
+
+export type SalesGranularity = "order" | "day";
 
 export class PeriodReportCalculator {
     computeCpa(totalAds: Money, orderCount: number): Money {
@@ -66,32 +75,38 @@ export class PeriodReportCalculator {
         return Array.from(map.entries()).map(([categoryName, cost]) => ({ categoryName, cost }));
     }
 
-    computeMarginSeries(orders: OrderInPeriod[], granularity: "hour" | "day"): { label: string; marginPct: number }[] {
-        const buckets = new Map<string, { sale: Money; cost: Money; shipping: Money }>();
-        for (const order of orders) {
-            const label = this.bucketLabel(order.orderedAt, granularity);
-            const current = buckets.get(label) ?? { sale: Money.zero(), cost: Money.zero(), shipping: Money.zero() };
-            buckets.set(label, {
-                sale: current.sale.add(order.sale),
-                cost: current.cost.add(order.itemsCost ?? Money.zero()),
-                shipping: current.shipping.add(order.shipping),
-            });
+    computeSalesSeries(
+        orders: OrderInPeriod[],
+        granularity: SalesGranularity,
+    ): { at: string; saleCents: number; costCents: number }[] {
+        if (granularity === "order") {
+            return orders
+                .slice()
+                .sort((a, b) => a.orderedAt.getTime() - b.orderedAt.getTime())
+                .map((order) => ({
+                    at: order.orderedAt.toISOString(),
+                    saleCents: order.sale.toCents(),
+                    costCents: (order.itemsCost ?? Money.zero()).toCents(),
+                }));
         }
-        return Array.from(buckets.entries())
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([label, { sale, cost, shipping }]) => ({
-                label,
-                marginPct: sale.subtract(cost).subtract(shipping).percentageOf(sale),
-            }));
+        return this.aggregateByDay(orders);
     }
 
-    private bucketLabel(date: Date, granularity: "hour" | "day"): string {
-        const y = pad(date.getUTCFullYear());
-        const m = pad(date.getUTCMonth() + 1);
-        const d = pad(date.getUTCDate());
-        if (granularity === "hour") {
-            return `${y}-${m}-${d} ${pad(date.getUTCHours())}h`;
+    private aggregateByDay(orders: OrderInPeriod[]): { at: string; saleCents: number; costCents: number }[] {
+        const byDay = new Map<string, { sale: Money; cost: Money }>();
+        for (const order of orders) {
+            const day = SP_DAY_FORMATTER.format(order.orderedAt);
+            const current = byDay.get(day) ?? { sale: Money.zero(), cost: Money.zero() };
+            current.sale = current.sale.add(order.sale);
+            current.cost = current.cost.add(order.itemsCost ?? Money.zero());
+            byDay.set(day, current);
         }
-        return `${y}-${m}-${d}`;
+        return Array.from(byDay.entries())
+            .sort(([dayA], [dayB]) => dayA.localeCompare(dayB))
+            .map(([day, totals]) => ({
+                at: `${day}T12:00:00.000Z`,
+                saleCents: totals.sale.toCents(),
+                costCents: totals.cost.toCents(),
+            }));
     }
 }

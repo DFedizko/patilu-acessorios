@@ -11,6 +11,7 @@ import type { IPackingRepository } from "@/server/domain/repository/IPackingRepo
 import { Packing } from "@/server/domain/entity/Packing";
 import { PackingItem } from "@/server/domain/entity/PackingItem";
 import { LooseItem } from "@/server/domain/entity/LooseItem";
+import { Money } from "@/server/domain/value-object/Money";
 import { NotFoundError } from "@/server/infrastructure/errors/NotFoundError";
 
 type PackingWithRelations = PrismaPacking & {
@@ -32,7 +33,7 @@ export class PackingPrismaRepository implements IPackingRepository {
             const record = await tx.packing.upsert({
                 where: { orderId: packing.getOrderId() },
                 create: {
-                    id: packing.getId(),
+                    id: packing.id.value,
                     orderId: packing.getOrderId(),
                     operatorId: packing.getOperatorId(),
                     packedAt: packing.getPackedAt(),
@@ -48,12 +49,12 @@ export class PackingPrismaRepository implements IPackingRepository {
                 packing.getItems().map((item) =>
                     tx.packingItem.create({
                         data: {
-                            id: item.getId(),
+                            id: item.id.value,
                             packingId: record.id,
                             tierId: item.getTierId(),
                             tierName: item.getTierName(),
                             categoryName: item.getCategoryName(),
-                            unitCostCents: item.getUnitCostCents(),
+                            unitCostCents: item.getUnitCost().toCents(),
                             quantity: item.getQuantity(),
                         },
                     }),
@@ -63,10 +64,10 @@ export class PackingPrismaRepository implements IPackingRepository {
                 packing.getLooseItems().map((item) =>
                     tx.looseItem.create({
                         data: {
-                            id: item.id,
+                            id: item.id.value,
                             packingId: record.id,
                             name: item.getName(),
-                            costCents: item.getCostCents(),
+                            costCents: item.getCost().toCents(),
                         },
                     }),
                 ),
@@ -105,7 +106,7 @@ export class PackingPrismaRepository implements IPackingRepository {
                     tierId: item.tierId ?? undefined,
                     tierName: item.tierName,
                     categoryName: item.categoryName,
-                    unitCostCents: item.unitCostCents,
+                    unitCostAmount: Money.fromCents(item.unitCostCents),
                     quantity: item.quantity,
                 }),
             ),
@@ -114,7 +115,7 @@ export class PackingPrismaRepository implements IPackingRepository {
                     id: item.id,
                     packingId: item.packingId,
                     name: item.name,
-                    costCents: item.costCents,
+                    costAmount: Money.fromCents(item.costCents),
                 }),
             ),
         });

@@ -6,7 +6,7 @@ import { usePersistedPeriod } from "@/hooks/use-persisted-period";
 import { PeriodTabs } from "@/components/ui/period-tabs";
 import { CustomDateRange } from "@/components/ui/custom-date-range";
 import { DashboardMetricCards } from "@/components/dashboard/dashboard-metric-cards";
-import { MarginChartPanel } from "@/components/dashboard/margin-chart-panel";
+import { SalesChartPanel } from "@/components/dashboard/sales-chart-panel";
 import { CategoryCostPanel } from "@/components/dashboard/category-cost-panel";
 import { ManualAdSpendForm } from "@/components/ad-spend/manual-ad-spend-form";
 import { DashboardMetricCardsSkeleton } from "@/components/dashboard/skeletons/dashboard-metric-cards-skeleton";
@@ -37,7 +37,7 @@ export const DashboardReport = () => {
                     {!data.adsAvailable && <ManualAdSpendForm from={customStart || undefined} />}
                     <DashboardMetricCards data={data} />
                     <div className="grid grid-cols-[1.5fr_1fr] gap-4">
-                        <MarginChartPanel marginSeries={data.marginSeries} />
+                        <SalesChartPanel salesSeries={data.salesSeries} />
                         <CategoryCostPanel costByCategory={data.costByCategory} />
                     </div>
                 </div>

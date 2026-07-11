@@ -38,7 +38,7 @@ describe("RenameCategoryUseCase", () => {
 
         // Act
         try {
-            await renameCategory.execute({ id: "non-existent-id", name: "Qualquer" });
+            await renameCategory.execute({ id: "00000000-0000-4000-8000-000000000000", name: "Qualquer" });
         } catch (error) {
             thrown = error;
         }

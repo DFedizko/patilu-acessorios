@@ -50,6 +50,14 @@ export class Money extends ValueObject<{ cents: number }> {
         return this.cents;
     }
 
+    toDecimalString(): string {
+        return (this.cents / 100).toFixed(2);
+    }
+
+    toBRL(): string {
+        return (this.cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
     isPositive(): boolean {
         return this.cents > 0;
     }

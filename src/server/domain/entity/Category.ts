@@ -1,4 +1,5 @@
 import { CategoryNameRequiredError } from "@/server/domain/error/CategoryNameRequiredError";
+import { UUID } from "@/server/domain/value-object/UUID";
 import { Entity } from "./Entity";
 
 type RestoreProps = {
@@ -14,10 +15,10 @@ type CategoryProps = {
     updatedAt: Date;
 };
 
-export class Category extends Entity<CategoryProps> {
+export class Category extends Entity<CategoryProps, UUID> {
     private constructor(
         protected readonly props: CategoryProps,
-        id?: string,
+        id?: UUID,
     ) {
         super(props, id);
     }
@@ -30,7 +31,10 @@ export class Category extends Entity<CategoryProps> {
     }
 
     static restore(props: RestoreProps): Category {
-        return new Category({ name: props.name, createdAt: props.createdAt, updatedAt: props.updatedAt }, props.id);
+        return new Category(
+            { name: props.name, createdAt: props.createdAt, updatedAt: props.updatedAt },
+            UUID.restore(props.id),
+        );
     }
 
     rename(name: string): void {

@@ -1,3 +1,4 @@
+import { fromZonedTime } from "date-fns-tz";
 import { ValueObject } from "./ValueObject";
 
 const SAO_PAULO_TZ = "America/Sao_Paulo";
@@ -28,7 +29,7 @@ export class Period extends ValueObject<{ start: Date; end: Date }> {
             month: "2-digit",
             day: "2-digit",
         });
-        const [year, month, day] = formatter.format(date).split("-").map(Number);
-        return new Date(Date.UTC(year!, month! - 1, day!));
+        const dateString = formatter.format(date);
+        return fromZonedTime(`${dateString}T00:00:00`, SAO_PAULO_TZ);
     }
 }

@@ -165,52 +165,75 @@ describe("PeriodReportCalculator", () => {
         });
     });
 
-    describe("computeMarginSeries", () => {
-        it("groups orders by hour for 'hour' granularity", () => {
-            // Arrange
+    describe("computeSalesSeries", () => {
+        it("emits one point per order with sale and cost cents, sorted ascending by orderedAt (granularity 'order')", () => {
+            // Arrange — deliberately out of order
             const orders = [
-                makeOrder({
-                    orderedAt: new Date("2024-01-01T10:00:00Z"),
-                    sale: Money.fromCents(10000),
-                    shipping: Money.fromCents(0),
-                    itemsCost: Money.fromCents(5000),
-                }),
-                makeOrder({
-                    orderedAt: new Date("2024-01-01T10:30:00Z"),
-                    sale: Money.fromCents(8000),
-                    shipping: Money.fromCents(0),
-                    itemsCost: Money.fromCents(4000),
-                }),
                 makeOrder({
                     orderedAt: new Date("2024-01-01T11:00:00Z"),
                     sale: Money.fromCents(6000),
-                    shipping: Money.fromCents(0),
                     itemsCost: Money.fromCents(3000),
+                }),
+                makeOrder({
+                    orderedAt: new Date("2024-01-01T10:00:00Z"),
+                    sale: Money.fromCents(10000),
+                    itemsCost: Money.fromCents(5000),
                 }),
             ];
 
             // Act
-            const result = calculator.computeMarginSeries(orders, "hour");
+            const result = calculator.computeSalesSeries(orders, "order");
 
-            // Assert — two hours: 10h (two orders) and 11h (one order), both 50% margin
+            // Assert — one point per order, earliest first
             expect(result).toHaveLength(2);
-            expect(result.every((r) => Math.abs(r.marginPct - 50) < 0.1)).toBe(true);
+            expect(result[0]!.at).toBe("2024-01-01T10:00:00.000Z");
+            expect(result[0]!.saleCents).toBe(10000);
+            expect(result[0]!.costCents).toBe(5000);
+            expect(result[1]!.saleCents).toBe(6000);
         });
 
-        it("groups orders by day for 'day' granularity", () => {
+        it("treats a missing itemsCost as zero cost", () => {
             // Arrange
+            const orders = [makeOrder({ itemsCost: null, sale: Money.fromCents(4000) })];
+
+            // Act
+            const result = calculator.computeSalesSeries(orders, "order");
+
+            // Assert
+            expect(result[0]!.costCents).toBe(0);
+        });
+
+        it("aggregates sale and cost totals per São Paulo day (granularity 'day')", () => {
+            // Arrange — three orders across two SP days (first crosses the UTC/SP boundary)
             const orders = [
-                makeOrder({ orderedAt: new Date("2024-01-01T10:00:00Z") }),
-                makeOrder({ orderedAt: new Date("2024-01-02T10:00:00Z") }),
+                makeOrder({
+                    orderedAt: new Date("2024-01-02T01:00:00Z"), // 2024-01-01 22:00 SP
+                    sale: Money.fromCents(1000),
+                    itemsCost: Money.fromCents(400),
+                }),
+                makeOrder({
+                    orderedAt: new Date("2024-01-01T15:00:00Z"), // 2024-01-01 12:00 SP
+                    sale: Money.fromCents(2000),
+                    itemsCost: Money.fromCents(600),
+                }),
+                makeOrder({
+                    orderedAt: new Date("2024-01-02T15:00:00Z"), // 2024-01-02 12:00 SP
+                    sale: Money.fromCents(5000),
+                    itemsCost: null,
+                }),
             ];
 
             // Act
-            const result = calculator.computeMarginSeries(orders, "day");
+            const result = calculator.computeSalesSeries(orders, "day");
 
-            // Assert
+            // Assert — one point per SP day, summed, sorted ascending
             expect(result).toHaveLength(2);
-            expect(result[0]!.label).toBe("2024-01-01");
-            expect(result[1]!.label).toBe("2024-01-02");
+            expect(result[0]!.at).toBe("2024-01-01T12:00:00.000Z");
+            expect(result[0]!.saleCents).toBe(3000);
+            expect(result[0]!.costCents).toBe(1000);
+            expect(result[1]!.at).toBe("2024-01-02T12:00:00.000Z");
+            expect(result[1]!.saleCents).toBe(5000);
+            expect(result[1]!.costCents).toBe(0);
         });
     });
 });

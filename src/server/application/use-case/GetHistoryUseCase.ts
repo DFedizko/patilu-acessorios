@@ -51,6 +51,8 @@ export class GetHistoryUseCase implements IGetHistoryUseCase {
     }
 
     private buildRow(order: ReportOrder, cpa: Money, fixedCosts: FixedCosts): HistoryRow {
+        const tax = this.calculator.computeTax(order.sale);
+        const fixedCost = fixedCosts.totalForOrder(order.itemCount);
         const base = {
             orderId: order.orderId,
             orderNumber: order.orderNumber,
@@ -59,13 +61,23 @@ export class GetHistoryUseCase implements IGetHistoryUseCase {
             saleCents: order.sale.toCents(),
             itemsCostCents: order.itemsCost !== null ? order.itemsCost.toCents() : null,
             cpaCents: cpa.toCents(),
-            taxCents: this.calculator.computeTax(order.sale).toCents(),
-            fixedCostCents: fixedCosts.totalForOrder(order.itemCount).toCents(),
+            taxCents: tax.toCents(),
+            fixedCostCents: fixedCost.toCents(),
+            saleBrl: order.sale.toBRL(),
+            itemsCostBrl: order.itemsCost !== null ? order.itemsCost.toBRL() : null,
+            cpaBrl: cpa.toBRL(),
+            taxBrl: tax.toBRL(),
+            fixedCostBrl: fixedCost.toBRL(),
         };
         if (order.itemsCost === null) {
-            return { ...base, netMarginCents: null, netMarginPct: null };
+            return { ...base, netMarginCents: null, netMarginPct: null, netMarginBrl: null };
         }
         const margin = this.calculator.computeNetMarginPerOrder(order, cpa, fixedCosts);
-        return { ...base, netMarginCents: margin.value.toCents(), netMarginPct: margin.pct };
+        return {
+            ...base,
+            netMarginCents: margin.value.toCents(),
+            netMarginPct: margin.pct,
+            netMarginBrl: margin.value.toBRL(),
+        };
     }
 }
